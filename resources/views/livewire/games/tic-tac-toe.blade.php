@@ -125,7 +125,30 @@ new class extends Component {
 }; ?>
 
 <div>
-<section class="max-w-2xl mx-auto p-6 select-none" x-data="{
+    <x-game.styles />
+    <x-game.animations />
+    
+    <x-game.layout title="Tic Tac Toe">
+        <!-- Game Header -->
+        <div class="game-header">
+            <div class="game-status">
+                @if($winner)
+                    <div class="winner-indicator">
+                        {{ $winner === 'X' ? 'You Win!' : ($mode === 'pass' ? 'O Wins!' : 'AI Wins!') }}
+                    </div>
+                @elseif($isDraw)
+                    <div class="draw-indicator">
+                        It's a Draw!
+                    </div>
+                @else
+                    <div class="player-indicator">
+                        {{ $current === 'X' ? "Your Turn" : ($mode === 'pass' ? "O's Turn" : "AI's Turn") }}
+                    </div>
+                @endif
+            </div>
+        </div>
+
+<section class="select-none" x-data="{
     onTouchStart(e, pos) {
         e.preventDefault();
         $wire.play(pos);
@@ -136,113 +159,70 @@ x-on:keydown.window="
         $wire.play(parseInt($event.key) - 1);
     }
 ">
-    <h1 class="text-4xl font-bold mb-6 text-center">Tic-Tac-Toe</h1>
 
-    <!-- Game Mode Selection -->
-    <div class="mb-8">
-        <div class="text-center mb-4">
-            <div class="text-sm opacity-80 mb-2">Choose Your Challenge</div>
-            <div class="flex justify-center gap-2 flex-wrap">
-                <flux:button wire:click="newGame('pass')" variant="{{ $mode === 'pass' ? 'primary' : 'outline' }}" size="sm">
-                    👥 Pass & Play
-                </flux:button>
-                <flux:button wire:click="newGame('easy')" variant="{{ $mode === 'easy' ? 'primary' : 'outline' }}" size="sm">
-                    😴 Easy AI
-                </flux:button>
-                <flux:button wire:click="newGame('medium')" variant="{{ $mode === 'medium' ? 'primary' : 'outline' }}" size="sm">
-                    🤔 Medium AI
-                </flux:button>
-                <flux:button wire:click="newGame('hard')" variant="{{ $mode === 'hard' ? 'primary' : 'outline' }}" size="sm">
-                    💪 Hard AI
-                </flux:button>
-                <flux:button wire:click="newGame('impossible')" variant="{{ $mode === 'impossible' ? 'primary' : 'outline' }}" size="sm">
-                    🔥 Impossible AI
-                </flux:button>
+        <!-- Game Settings -->
+        <div class="game-settings">
+            <div class="setting-group">
+                <label>Mode:</label>
+                <select wire:change="newGame($event.target.value)" class="setting-select">
+                    <option value="pass" {{ $mode === 'pass' ? 'selected' : '' }}>Pass & Play</option>
+                    <option value="easy" {{ $mode === 'easy' ? 'selected' : '' }}>Easy AI</option>
+                    <option value="medium" {{ $mode === 'medium' ? 'selected' : '' }}>Medium AI</option>
+                    <option value="hard" {{ $mode === 'hard' ? 'selected' : '' }}>Hard AI</option>
+                    <option value="impossible" {{ $mode === 'impossible' ? 'selected' : '' }}>Impossible AI</option>
+                </select>
             </div>
         </div>
         
         @if($mode !== 'pass')
-            <div class="text-center">
-                <div class="inline-flex items-center gap-4 text-sm">
-                    <span class="flex items-center gap-1">
-                        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
-                        You (X): {{ $playerWins }}
-                    </span>
-                    <span class="flex items-center gap-1">
-                        <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                        AI (O): {{ $aiWins }}
-                    </span>
-                    <span class="flex items-center gap-1">
-                        <span class="w-3 h-3 bg-gray-400 rounded-full"></span>
-                        Draws: {{ $draws }}
-                    </span>
+            <!-- Game Info Panel -->
+            <div class="game-info">
+                <h3>Game Stats</h3>
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">You (X):</span>
+                        <span class="stat-value">{{ $playerWins }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">AI (O):</span>
+                        <span class="stat-value">{{ $aiWins }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Draws:</span>
+                        <span class="stat-value">{{ $draws }}</span>
+                    </div>
                 </div>
             </div>
         @endif
-    </div>
 
-    <!-- Game Board -->
-    <div class="mx-auto mb-8" style="width: 320px; height: 320px;">
-        <div class="game-board relative" style="width: 320px; height: 320px; background: #2c3e50; border-radius: 8px; padding: 20px;">
-            <!-- Hashtag Grid Lines -->
-            <div class="grid-lines absolute inset-0" style="margin: 20px;">
-                <!-- Vertical lines -->
-                <div class="absolute bg-slate-300 dark:bg-slate-500" style="width: 3px; height: 280px; left: 93.33px; top: 0;"></div>
-                <div class="absolute bg-slate-300 dark:bg-slate-500" style="width: 3px; height: 280px; left: 186.67px; top: 0;"></div>
-                <!-- Horizontal lines -->
-                <div class="absolute bg-slate-300 dark:bg-slate-500" style="height: 3px; width: 280px; top: 93.33px; left: 0;"></div>
-                <div class="absolute bg-slate-300 dark:bg-slate-500" style="height: 3px; width: 280px; top: 186.67px; left: 0;"></div>
-            </div>
+        <!-- Game Board -->
+        <div class="game-board-container">
+            <div class="tic-tac-toe-board">
             
-            <!-- Game Cells -->
-            @foreach ($board as $i => $cell)
-                @php
-                    $row = floor($i / 3);
-                    $col = $i % 3;
-                    $left = 20 + ($col * 93.33);
-                    $top = 20 + ($row * 93.33);
-                @endphp
-                <button 
-                    wire:click="play({{ $i }})" 
-                    x-on:touchstart="onTouchStart($event, {{ $i }})"
-                    class="game-cell absolute transition-all duration-200 flex items-center justify-center
-                    @if(!$isGameActive || $cell !== null) cursor-default @else hover:bg-white/10 cursor-pointer @endif
-                    @if(in_array($i, $winningLine)) 
-                        bg-green-500/20 animate-pulse
-                    @elseif($lastMove === $i)
-                        bg-blue-500/20
-                    @endif
-                    text-6xl font-bold
-                    @if($cell === 'X')
-                        text-blue-400
-                    @elseif($cell === 'O')
-                        text-red-400
-                    @else
-                        text-gray-500
-                    @endif
-                    "
-                    style="
-                        width: 90px; 
-                        height: 90px; 
-                        left: {{ $left }}px; 
-                        top: {{ $top }}px;
-                        border-radius: 4px;
-                    ">
-                    @if($cell === 'X')
-                        <svg class="cell-content @if($lastMove === $i) animate-bounce @endif" width="50" height="50" viewBox="0 0 50 50">
-                            <path d="M8 8 L42 42 M42 8 L8 42" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-                        </svg>
-                    @elseif($cell === 'O')
-                        <svg class="cell-content @if($lastMove === $i) animate-bounce @endif" width="50" height="50" viewBox="0 0 50 50">
-                            <circle cx="25" cy="25" r="18" fill="none" stroke="currentColor" stroke-width="4"/>
-                        </svg>
-                    @else
-                        <span class="cell-number opacity-20 text-xs">{{ $i + 1 }}</span>
-                    @endif
-                </button>
-            @endforeach
+                <!-- Game Cells -->
+                @foreach ($board as $i => $cell)
+                    <button 
+                        wire:click="play({{ $i }})" 
+                        x-on:touchstart="onTouchStart($event, {{ $i }})"
+                        class="tic-tac-toe-cell
+                               {{ !$isGameActive || $cell !== null ? 'cursor-default' : 'cursor-pointer hover-lift' }}
+                               {{ in_array($i, $winningLine) ? 'winning-cell' : '' }}
+                               {{ $lastMove === $i ? 'last-move-cell' : '' }}">
+                        @if($cell === 'X')
+                            <svg class="cell-symbol {{ $lastMove === $i ? 'scale-in' : '' }}" viewBox="0 0 50 50">
+                                <path d="M8 8 L42 42 M42 8 L8 42" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                            </svg>
+                        @elseif($cell === 'O')
+                            <svg class="cell-symbol {{ $lastMove === $i ? 'scale-in' : '' }}" viewBox="0 0 50 50">
+                                <circle cx="25" cy="25" r="18" fill="none" stroke="currentColor" stroke-width="4"/>
+                            </svg>
+                        @else
+                            <span class="cell-number">{{ $i + 1 }}</span>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
         </div>
-    </div>
 
     <!-- Game Status -->
     <div class="text-center mb-6">
@@ -337,24 +317,87 @@ x-on:keydown.window="
         .cell-number {
             transition: opacity 0.2s ease-in-out;
         }
-        
-        .game-cell:hover .cell-number {
-            opacity: 0.6;
+        /* Tic Tac Toe specific liminal styling */
+        .tic-tac-toe-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 2px;
+            width: 20rem;
+            height: 20rem;
+            margin: 0 auto;
+            background: rgb(203 213 225);
+            border-radius: 0.5rem;
+            padding: 2px;
         }
-        
-        .game-board {
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+
+        .dark .tic-tac-toe-board {
+            background: rgb(71 85 105);
         }
-        
-        .game-result {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
-            border-radius: 1rem;
-            padding: 1.5rem;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+
+        .tic-tac-toe-cell {
+            background: rgb(248 250 252);
+            border: none;
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .dark .tic-tac-toe-cell {
+            background: rgb(30 41 59);
+        }
+
+        .tic-tac-toe-cell:not(.cursor-default):hover {
+            background: rgb(226 232 240);
+        }
+
+        .dark .tic-tac-toe-cell:not(.cursor-default):hover {
+            background: rgb(51 65 85);
+        }
+
+        .tic-tac-toe-cell.winning-cell {
+            background: rgb(34 197 94 / 0.2);
+        }
+
+        .tic-tac-toe-cell.last-move-cell {
+            background: rgb(59 130 246 / 0.2);
+        }
+
+        .cell-symbol {
+            width: 3rem;
+            height: 3rem;
+            color: rgb(51 65 85);
+        }
+
+        .dark .cell-symbol {
+            color: rgb(203 213 225);
+        }
+
+        .cell-number {
+            font-size: 0.75rem;
+            color: rgb(148 163 184);
+            opacity: 0.5;
+        }
+
+        .dark .cell-number {
+            color: rgb(100 116 139);
         }
     </style>
+
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button wire:click="newGame('{{ $mode }}')" class="game-button">
+                New Game
+            </button>
+        </div>
+        
+</section>
+    </x-game.layout>
 </div>
 
 
