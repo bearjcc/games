@@ -105,6 +105,75 @@ Each color includes 3 different styling variants:
 
 **Note:** The single-style pieces appear to be variations of generic pawn-like figures, but the specific differences between indices 00-18 require further detailed analysis to identify unique characteristics.
 
+## Dice Assets Catalog
+
+### Asset Structure
+The project includes dice assets in 2 different colors:
+- **Red** (`Dice/dieRed*.png`)
+- **White** (`Dice/dieWhite*.png`)
+
+### Style Variants
+Each color includes 2 different styling variants:
+- `die{color}_border{1-6}.png` - Dice with borders/outlines
+- `die{color}{1-6}.png` - Dice without borders
+
+### Total Dice Assets
+**2 colors × 2 styles × 6 values = 24 individual dice images**
+
+### Dice Identification Catalog
+
+#### Red Dice with Border (`dieRed_border{1-6}.png`)
+
+| Value | Filename | Pip Count | Description | Tags |
+|-------|----------|-----------|-------------|------|
+| 1 | `dieRed_border1.png` | 1 pip | Red die with white border, single center pip | `dice`, `red`, `border`, `one` |
+| 2 | `dieRed_border2.png` | 2 pips | Red die with white border, diagonal pip arrangement | `dice`, `red`, `border`, `two` |
+| 3 | `dieRed_border3.png` | 3 pips | Red die with white border, diagonal pip arrangement | `dice`, `red`, `border`, `three` |
+| 4 | `dieRed_border4.png` | 4 pips | Red die with white border, 2x2 grid pip arrangement | `dice`, `red`, `border`, `four` |
+| 5 | `dieRed_border5.png` | 5 pips | Red die with white border, center + corners pip arrangement | `dice`, `red`, `border`, `five` |
+| 6 | `dieRed_border6.png` | 6 pips | Red die with white border, 2x3 grid pip arrangement | `dice`, `red`, `border`, `six` |
+
+#### Red Dice without Border (`dieRed{1-6}.png`)
+
+| Value | Filename | Pip Count | Description | Tags |
+|-------|----------|-----------|-------------|------|
+| 1 | `dieRed1.png` | 1 pip | Red die without border, single center pip | `dice`, `red`, `no-border`, `one` |
+| 2 | `dieRed2.png` | 2 pips | Red die without border, diagonal pip arrangement | `dice`, `red`, `no-border`, `two` |
+| 3 | `dieRed3.png` | 3 pips | Red die without border, diagonal pip arrangement | `dice`, `red`, `no-border`, `three` |
+| 4 | `dieRed4.png` | 4 pips | Red die without border, 2x2 grid pip arrangement | `dice`, `red`, `no-border`, `four` |
+| 5 | `dieRed5.png` | 5 pips | Red die without border, center + corners pip arrangement | `dice`, `red`, `no-border`, `five` |
+| 6 | `dieRed6.png` | 6 pips | Red die without border, 2x3 grid pip arrangement | `dice`, `red`, `no-border`, `six` |
+
+#### White Dice with Border (`dieWhite_border{1-6}.png`)
+
+| Value | Filename | Pip Count | Description | Tags |
+|-------|----------|-----------|-------------|------|
+| 1 | `dieWhite_border1.png` | 1 pip | White die with gray border, single center pip | `dice`, `white`, `border`, `one` |
+| 2 | `dieWhite_border2.png` | 2 pips | White die with gray border, diagonal pip arrangement | `dice`, `white`, `border`, `two` |
+| 3 | `dieWhite_border3.png` | 3 pips | White die with gray border, diagonal pip arrangement | `dice`, `white`, `border`, `three` |
+| 4 | `dieWhite_border4.png` | 4 pips | White die with gray border, 2x2 grid pip arrangement | `dice`, `white`, `border`, `four` |
+| 5 | `dieWhite_border5.png` | 5 pips | White die with gray border, center + corners pip arrangement | `dice`, `white`, `border`, `five` |
+| 6 | `dieWhite_border6.png` | 6 pips | White die with gray border, 2x3 grid pip arrangement | `dice`, `white`, `border`, `six` |
+
+#### White Dice without Border (`dieWhite{1-6}.png`)
+
+| Value | Filename | Pip Count | Description | Tags |
+|-------|----------|-----------|-------------|------|
+| 1 | `dieWhite1.png` | 1 pip | White die without border, single center pip | `dice`, `white`, `no-border`, `one` |
+| 2 | `dieWhite2.png` | 2 pips | White die without border, diagonal pip arrangement | `dice`, `white`, `no-border`, `two` |
+| 3 | `dieWhite3.png` | 3 pips | White die without border, diagonal pip arrangement | `dice`, `white`, `no-border`, `three` |
+| 4 | `dieWhite4.png` | 4 pips | White die without border, 2x2 grid pip arrangement | `dice`, `white`, `no-border`, `four` |
+| 5 | `dieWhite5.png` | 5 pips | White die without border, center + corners pip arrangement | `dice`, `white`, `no-border`, `five` |
+| 6 | `dieWhite6.png` | 6 pips | White die without border, 2x3 grid pip arrangement | `dice`, `white`, `no-border`, `six` |
+
+### Standard Dice Pip Arrangements
+- **1 pip:** Center position
+- **2 pips:** Diagonal arrangement (top-left to bottom-right)
+- **3 pips:** Diagonal arrangement (top-left, center, bottom-right)
+- **4 pips:** 2x2 grid arrangement
+- **5 pips:** Center pip + four corner pips
+- **6 pips:** 2x3 grid arrangement (two columns of three)
+
 ## Categories Summary
 
 ### Border Style Pieces
@@ -123,9 +192,16 @@ Each color includes 3 different styling variants:
 - **Generic Pawns (19 pieces)**: All single-style pieces appear to be variations of generic pawn-like figures
 - **Note**: The specific differences between single-style indices 00-18 require further analysis
 
+### Dice Assets
+- **Red Dice (12 pieces)**: Complete set of 1-6 pip dice in border and no-border styles
+- **White Dice (12 pieces)**: Complete set of 1-6 pip dice in border and no-border styles
+- **Standard Arrangements**: All dice follow traditional pip arrangements for values 1-6
+
 ## Usage Guidelines
 
 ### File Naming Convention
+
+#### Game Pieces
 All pieces follow the pattern: `piece{Color}_{Style}{Index}.png`
 
 Examples:
@@ -133,8 +209,18 @@ Examples:
 - `pieceRed_multi12.png` - Red sailboat in multi-color style
 - `pieceBlue_single08.png` - Blue chess rook in single color
 
+#### Dice Assets
+Dice follow the pattern: `die{Color}[_border]{Value}.png`
+
+Examples:
+- `dieRed_border3.png` - Red die with border showing 3 pips
+- `dieWhite5.png` - White die without border showing 5 pips
+- `dieRed6.png` - Red die without border showing 6 pips
+
 ### Asset Loading
 Use the `@images/` alias for proper Bootstrap bundling:
+
+#### Game Pieces
 ```php
 // In Blade templates
 <img src="@images('Pieces (Black)/pieceBlack_border05.png')" alt="Arrow Piece">
@@ -143,12 +229,30 @@ Use the `@images/` alias for proper Bootstrap bundling:
 $this->pieceImage = '@images/Pieces (Black)/pieceBlack_border05.png';
 ```
 
+#### Dice Assets
+```php
+// In Blade templates
+<img src="@images('Dice/dieRed_border3.png')" alt="Red Die 3">
+
+// In Livewire components
+$this->dieImage = '@images/Dice/dieWhite5.png';
+```
+
 ### Game Integration
+
+#### Game Pieces
 These pieces are designed for use across multiple game types:
 - **Chess variants**: Use pieces 01, 08 for traditional chess
 - **Board games**: Use pieces 00, 02-04, 09-10 for generic tokens
 - **Thematic games**: Use pieces 05-07, 11-16 for specific themes
 - **Custom games**: Mix and match based on game requirements
+
+#### Dice Assets
+Dice are essential for many game types:
+- **Dice games**: Yahtzee, Farkle, Liar's Dice
+- **Board games**: Monopoly, Risk, Settlers of Catan
+- **RPG elements**: Character creation, random events
+- **Educational games**: Math games, probability lessons
 
 ## Maintenance Notes
 
@@ -168,9 +272,15 @@ These pieces are designed for use across multiple game types:
 
 4. **Asset Structure**: Each color folder contains 3 complete sets of 19 pieces each, totaling 57 pieces per color across all 7 colors.
 
+5. **Dice Assets**: Complete set of 24 dice images covering all standard values (1-6) in two colors (red, white) and two styles (with/without borders).
+
 ## Last Updated
 Generated on: $(date)
-Total pieces cataloged: 
-- Border style: 17 of 19 (pieces 17-18 pending identification)
-- Multi style: 19 pieces identified as generic pawn variations (specific differences pending analysis)
-- Single style: 19 pieces identified as generic pawn variations (specific differences pending analysis)
+Total assets cataloged: 
+- **Game Pieces**: 399 total (7 colors × 3 styles × 19 pieces)
+  - Border style: 17 of 19 (pieces 17-18 pending identification)
+  - Multi style: 19 pieces identified as generic pawn variations (specific differences pending analysis)
+  - Single style: 19 pieces identified as generic pawn variations (specific differences pending analysis)
+- **Dice Assets**: 24 total (2 colors × 2 styles × 6 values)
+  - Red dice: 12 pieces (complete set 1-6 in both styles)
+  - White dice: 12 pieces (complete set 1-6 in both styles)
