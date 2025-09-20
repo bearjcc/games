@@ -11,6 +11,10 @@ new class extends Component {
     public int $best = 0;
     public bool $isWon = false;
     public bool $isGameOver = false;
+    public array $previousBoard = [];
+    public array $newTiles = [];
+    public array $mergedTiles = [];
+    public int $previousScore = 0;
 
     public function mount(): void
     {
@@ -21,6 +25,10 @@ new class extends Component {
         $this->isWon = $state['isWon'];
         $this->isGameOver = $game->isOver($state);
         $this->best = app(UserBestScoreService::class)->get(Auth::user(), '2048');
+        $this->previousBoard = $this->board;
+        $this->previousScore = $this->score;
+        $this->newTiles = [];
+        $this->mergedTiles = [];
     }
 
     public function resetBoard(): void
@@ -38,6 +46,26 @@ new class extends Component {
         
         // Only update if move was valid (board changed)
         if ($next['board'] !== $this->board) {
+            // Track animation data
+            $this->previousBoard = $this->board;
+            $this->previousScore = $this->score;
+            
+            // Find new tiles (appeared after move)
+            $this->newTiles = [];
+            for ($i = 0; $i < 16; $i++) {
+                if ($this->board[$i] === 0 && $next['board'][$i] > 0) {
+                    $this->newTiles[] = $i;
+                }
+            }
+            
+            // Find merged tiles (for animation)
+            $this->mergedTiles = [];
+            for ($i = 0; $i < 16; $i++) {
+                if ($this->board[$i] > 0 && $next['board'][$i] > $this->board[$i]) {
+                    $this->mergedTiles[] = $i;
+                }
+            }
+            
             $this->board = $next['board'];
             $this->score = $next['score'];
             $this->isWon = $next['isWon'];
@@ -45,22 +73,66 @@ new class extends Component {
             
             app(UserBestScoreService::class)->updateIfBetter(Auth::user(), '2048', $this->score);
             $this->best = app(UserBestScoreService::class)->get(Auth::user(), '2048');
+            
+            // Clear animation data after a short delay
+            $this->dispatch('tiles-moved');
         }
     }
 }; ?>
 
-<section class="max-w-lg mx-auto p-6 select-none" x-data="{ onKey(e){
-    if (['ArrowUp','KeyW'].includes(e.code)) { $wire.move('up'); }
-    if (['ArrowLeft','KeyA'].includes(e.code)) { $wire.move('left'); }
-    if (['ArrowDown','KeyS'].includes(e.code)) { $wire.move('down'); }
-    if (['ArrowRight','KeyD'].includes(e.code)) { $wire.move('right'); }
-  }}" x-on:keydown.window.prevent="onKey($event)">
+<section class="max-w-lg mx-auto p-6 select-none" x-data="{
+    startX: 0, startY: 0, threshold: 50,
+    onKey(e) {
+        if (['ArrowUp','KeyW'].includes(e.code)) { $wire.move('up'); }
+        if (['ArrowLeft','KeyA'].includes(e.code)) { $wire.move('left'); }
+        if (['ArrowDown','KeyS'].includes(e.code)) { $wire.move('down'); }
+        if (['ArrowRight','KeyD'].includes(e.code)) { $wire.move('right'); }
+    },
+    onTouchStart(e) {
+        this.startX = e.touches[0].clientX;
+        this.startY = e.touches[0].clientY;
+    },
+    onTouchEnd(e) {
+        if (!this.startX || !this.startY) return;
+        
+        let endX = e.changedTouches[0].clientX;
+        let endY = e.changedTouches[0].clientY;
+        let diffX = this.startX - endX;
+        let diffY = this.startY - endY;
+        
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            if (Math.abs(diffX) > this.threshold) {
+                if (diffX > 0) $wire.move('left');
+                else $wire.move('right');
+            }
+        } else {
+            if (Math.abs(diffY) > this.threshold) {
+                if (diffY > 0) $wire.move('up');
+                else $wire.move('down');
+            }
+        }
+        
+        this.startX = 0;
+        this.startY = 0;
+    }
+}" 
+x-on:keydown.window.prevent="onKey($event)"
+x-on:touchstart.prevent="onTouchStart($event)"
+x-on:touchend.prevent="onTouchEnd($event)">
     <h1 class="text-3xl font-bold mb-4 text-center">2048</h1>
     
     <div class="flex justify-between mb-6">
         <div class="text-center">
             <div class="text-sm opacity-80">Score</div>
-            <div class="text-xl font-bold">{{ number_format($score) }}</div>
+            <div class="text-xl font-bold score-display" x-data="{ score: {{ $score }}, previousScore: {{ $previousScore }} }" 
+                 x-effect="if (score !== previousScore) { $el.style.transform = 'scale(1.2)'; setTimeout(() => $el.style.transform = 'scale(1)', 200); }">
+                {{ number_format($score) }}
+            </div>
+            @if($score > $previousScore)
+                <div class="text-green-500 text-sm font-bold score-gain" style="animation: scoreGain 1s ease-out;">
+                    +{{ number_format($score - $previousScore) }}
+                </div>
+            @endif
         </div>
         @auth
         <div class="text-center">
@@ -100,7 +172,8 @@ new class extends Component {
         <div class="tile-container" style="position: absolute; z-index: 2;">
             @foreach ($board as $i => $tile)
                 @if($tile > 0)
-                    <div class="tile tile-{{ $tile }}" style="
+                    <div class="tile tile-{{ $tile }} @if(in_array($i, $newTiles)) tile-new @endif @if(in_array($i, $mergedTiles)) tile-merged @endif" 
+                         style="
                         position: absolute;
                         width: 70px;
                         height: 70px;
@@ -109,7 +182,7 @@ new class extends Component {
                         display: flex;
                         justify-content: center;
                         align-items: center;
-                        transition: all 0.15s ease-in-out;
+                        transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                         top: {{ floor($i / 4) * 80 + 10 }}px;
                         left: {{ ($i % 4) * 80 + 10 }}px;
                         @if($tile === 2)
@@ -155,21 +228,84 @@ new class extends Component {
             }
         }
         
+        @keyframes tile-spawn {
+            0% { 
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes tile-merge {
+            0% { 
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+            100% { 
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes scoreGain {
+            0% { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+        
         .game-container {
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            touch-action: none;
         }
         
         .tile {
             font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
             user-select: none;
+            will-change: transform, top, left;
+        }
+        
+        .tile-new {
+            animation: tile-spawn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .tile-merged {
+            animation: tile-merge 0.15s ease-in-out;
         }
         
         .tile:hover {
             transform: scale(1.05) !important;
+            z-index: 10;
+        }
+        
+        .score-display {
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .score-gain {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
         }
     </style>
     <div class="mt-6 text-center">
-        <div class="text-sm opacity-80 mb-3">Use arrow keys or WASD to play</div>
+        <div class="text-sm opacity-80 mb-3">
+            <span class="hidden sm:inline">Use arrow keys or WASD to play</span>
+            <span class="sm:hidden">Swipe to play</span>
+        </div>
         <div class="flex justify-center gap-2">
             <flux:button wire:click="move('up')" size="sm">↑</flux:button>
         </div>

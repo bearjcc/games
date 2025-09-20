@@ -79,6 +79,7 @@ describe('2048 Game Feature', function () {
         
         // Check for proper positioning and transitions
         expect($content)->toContain('position: absolute');
-        expect($content)->toContain('transition: all 0.15s ease-in-out');
+        expect($content)->toContain('transition: all 0.25s cubic-bezier');
+        expect($content)->toContain('touch-action: none'); // Touch controls
     });
 });
