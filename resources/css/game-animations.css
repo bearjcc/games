@@ -1,0 +1,366 @@
+/**
+ * Game Animation Styles
+ * Provides CSS animations and effects for enhanced game experiences
+ */
+
+/* Audio Control Panel */
+.audio-control-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.audio-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--game-text-primary, #e0e0e0);
+    font-size: 0.9rem;
+}
+
+.audio-toggle {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--game-accent-primary, #007bff);
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.volume-slider {
+    width: 80px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--game-accent-primary, #007bff);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--game-accent-primary, #007bff);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.volume-icon {
+    font-size: 1rem;
+    color: var(--game-text-primary, #e0e0e0);
+}
+
+/* Dice Animation Styles */
+.dice-container {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    display: inline-block;
+}
+
+.die {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.die:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.die.selected {
+    border: 2px solid var(--game-success, #28a745);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.die.rolling {
+    animation: diceRoll 1s ease-in-out;
+}
+
+@keyframes diceRoll {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(90deg) scale(1.1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    75% { transform: rotate(270deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Card Animation Styles */
+.card-container {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    display: inline-block;
+}
+
+.card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform-style: preserve-3d;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card.selected {
+    border: 2px solid var(--game-success, #28a745);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    transform: translateY(-8px) rotate(5deg);
+}
+
+.card.playable {
+    border: 2px solid var(--game-success, #28a745);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+}
+
+.card.dealing {
+    animation: cardDeal 0.8s ease-out;
+}
+
+.card.flipping {
+    animation: cardFlip 0.6s ease-in-out;
+}
+
+@keyframes cardDeal {
+    0% {
+        transform: translateX(-200px) translateY(-100px) rotate(-180deg) scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(0) translateY(-50px) rotate(-90deg) scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes cardFlip {
+    0% { transform: scaleX(1); }
+    50% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
+}
+
+/* Piece Animation Styles */
+.game-piece {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.game-piece:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.game-piece.selected {
+    border: 2px solid var(--game-accent-primary, #007bff);
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.3);
+}
+
+.game-piece.moving {
+    animation: pieceMove 0.5s ease-in-out;
+}
+
+.game-piece.dropping {
+    animation: pieceDrop 0.8s ease-out;
+}
+
+@keyframes pieceMove {
+    0% { transform: translate(0, 0); }
+    50% { transform: translate(var(--move-x, 0), var(--move-y, 0)) scale(1.1); }
+    100% { transform: translate(var(--move-x, 0), var(--move-y, 0)) scale(1); }
+}
+
+@keyframes pieceDrop {
+    0% {
+        transform: translateY(-200px) scale(0.8);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(-50px) scale(1.1);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Score Animation Styles */
+.score-display {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-display.updating {
+    animation: scoreUpdate 0.5s ease-out;
+}
+
+@keyframes scoreUpdate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: var(--game-success, #28a745); }
+    100% { transform: scale(1); }
+}
+
+/* Win Celebration Styles */
+.win-celebration {
+    animation: winCelebration 1s ease-out;
+}
+
+@keyframes winCelebration {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(5deg); }
+    50% { transform: scale(1.2) rotate(-5deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--game-accent-primary, #007bff);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Particle Effects */
+.particle {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    background: var(--game-accent-primary, #007bff);
+    animation: particleFloat 2s ease-out forwards;
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Enhanced Button Styles */
+.action-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.action-button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.action-button:active {
+    transform: scale(0.95);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .audio-control-panel {
+        top: 10px;
+        right: 10px;
+        padding: 0.75rem;
+    }
+    
+    .audio-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .volume-slider {
+        width: 60px;
+    }
+    
+    .die, .card, .game-piece {
+        transform: none !important;
+    }
+    
+    .die:hover, .card:hover, .game-piece:hover {
+        transform: none !important;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .die, .card, .game-piece, .score-display, .action-button {
+        transition: none;
+        animation: none;
+    }
+    
+    .die.rolling, .card.dealing, .card.flipping, .game-piece.moving, .game-piece.dropping {
+        animation: none;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .audio-control-panel {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .die, .card, .game-piece {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .die:hover, .card:hover, .game-piece:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+}

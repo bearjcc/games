@@ -35,6 +35,12 @@ new class extends Component
             $this->state = $game->applyMove($this->state, $move);
             $this->updatePossibleScores();
             
+            // Trigger enhanced dice rolling animation
+            $this->dispatch('dice-rolled', [
+                'values' => $this->state['dice'],
+                'rollCount' => $this->state['rollCount']
+            ]);
+            
             // Show scoring options if no more rolls
             if (!$game->canRoll($this->state)) {
                 $this->showScores = true;
@@ -158,13 +164,15 @@ new class extends Component
         <div class="game-board-container">
             <div class="yahtzee-game-board">
                 <!-- Dice Section -->
-                <div class="dice-section">
+                <div class="dice-section" data-game-id="yahtzee">
                     <h3 class="section-title">Dice</h3>
                     <div class="dice-container">
                         @foreach($state['dice'] as $index => $value)
                             <div class="dice-wrapper">
-                                <div class="dice {{ $state['diceHeld'][$index] ? 'held' : '' }}"
+                                <div class="dice die {{ $state['diceHeld'][$index] ? 'held selected' : '' }}"
                                      wire:click="toggleDiceHold({{ $index }})"
+                                     data-dice-index="{{ $index }}"
+                                     data-dice-value="{{ $value }}"
                                      style="background-image: url('{{ Vite::asset('resources/img/Dice/' . $this->getDiceImage($value)) }}')">
                                 </div>
                                 @if($state['diceHeld'][$index])
@@ -177,7 +185,7 @@ new class extends Component
                     @if(!$state['gameOver'])
                         <div class="dice-controls">
                             @if($state['phase'] === 'rolling' && $state['rollsRemaining'] > 0)
-                                <button wire:click="rollDice" class="game-button roll-button">
+                                <button wire:click="rollDice" class="game-button roll-button roll-dice-button">
                                     Roll Dice ({{ $state['rollsRemaining'] }} left)
                                 </button>
                             @elseif($state['phase'] === 'scoring')
@@ -509,4 +517,55 @@ new class extends Component
         color: rgb(96 165 250);
     }
     </style>
+
+    <!-- Enhanced Animation Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Listen for dice rolled events
+            Livewire.on('dice-rolled', function(data) {
+                if (window.DiceAnimations && data.values) {
+                    const diceElements = document.querySelectorAll('[data-game-id="yahtzee"] .die');
+                    const finalValues = data.values;
+                    
+                    // Trigger enhanced dice rolling animation
+                    window.DiceAnimations.rollMultipleDice(
+                        Array.from(diceElements), 
+                        finalValues,
+                        {
+                            duration: 1.5,
+                            intensity: 'medium',
+                            onComplete: function() {
+                                console.log('Dice rolling animation completed');
+                            }
+                        }
+                    );
+                }
+            });
+
+            // Add dice selection animations
+            document.querySelectorAll('[data-game-id="yahtzee"] .die').forEach(die => {
+                die.addEventListener('click', function() {
+                    if (window.DiceAnimations) {
+                        const isSelected = this.classList.contains('selected');
+                        window.DiceAnimations.selectDie(this, !isSelected);
+                    }
+                });
+            });
+
+            // Add hover effects
+            document.querySelectorAll('[data-game-id="yahtzee"] .die').forEach(die => {
+                die.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('held')) {
+                        this.style.transform = 'translateY(-4px) scale(1.05)';
+                    }
+                });
+                
+                die.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('held')) {
+                        this.style.transform = '';
+                    }
+                });
+            });
+        });
+    </script>
 </div>
