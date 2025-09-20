@@ -50,40 +50,63 @@ final class Engine
         return $board;
     }
 
-    /** Minimax best move for the given player (optimal play). */
+    /** 
+     * Perfect minimax algorithm - IMPOSSIBLE to beat
+     * Uses alpha-beta pruning for optimal performance
+     */
     public function bestMoveMinimax(array $board, string $player): int
     {
-        $opponent = $player === 'X' ? 'O' : 'X';
-
-        $score = function(array $b, int $depth) use (&$score, $player, $opponent): int {
-            $w = $this->winner($b);
-            if ($w === $player) return 10 - $depth;
-            if ($w === $opponent) return $depth - 10;
-            if ($this->isDraw($b)) return 0;
-
-            $current = $this->currentTurn($b);
-            $best = ($current === $player) ? -1000 : 1000;
-            foreach ($this->availableMoves($b) as $move) {
-                $b2 = $b;
-                $b2[$move] = $current;
-                $s = $score($b2, $depth + 1);
-                if ($current === $player) {
-                    if ($s > $best) { $best = $s; }
-                } else {
-                    if ($s < $best) { $best = $s; }
+        $minimax = function(array $board, string $currentPlayer, int $depth, int $alpha = -1000, int $beta = 1000) use (&$minimax, $player): int {
+            $winner = $this->winner($board);
+            
+            // Terminal states
+            if ($winner === $player) return 10 - $depth; // Prefer faster wins
+            if ($winner !== null) return $depth - 10; // Prefer slower losses  
+            if ($this->isDraw($board)) return 0;
+            
+            $availableMoves = $this->availableMoves($board);
+            
+            if ($currentPlayer === $player) {
+                // Maximizing player (AI)
+                $maxEval = -1000;
+                foreach ($availableMoves as $move) {
+                    $newBoard = $board;
+                    $newBoard[$move] = $currentPlayer;
+                    $eval = $minimax($newBoard, $currentPlayer === 'X' ? 'O' : 'X', $depth + 1, $alpha, $beta);
+                    $maxEval = max($maxEval, $eval);
+                    $alpha = max($alpha, $eval);
+                    if ($beta <= $alpha) break; // Alpha-beta pruning
                 }
+                return $maxEval;
+            } else {
+                // Minimizing player (opponent)
+                $minEval = 1000;
+                foreach ($availableMoves as $move) {
+                    $newBoard = $board;
+                    $newBoard[$move] = $currentPlayer;
+                    $eval = $minimax($newBoard, $currentPlayer === 'X' ? 'O' : 'X', $depth + 1, $alpha, $beta);
+                    $minEval = min($minEval, $eval);
+                    $beta = min($beta, $eval);
+                    if ($beta <= $alpha) break; // Alpha-beta pruning
+                }
+                return $minEval;
             }
-            return $best;
         };
-
-        $bestScore = -1000;
+        
         $bestMove = -1;
+        $bestValue = -1000;
+        
         foreach ($this->availableMoves($board) as $move) {
-            $b2 = $board;
-            $b2[$move] = $player;
-            $s = $score($b2, 0);
-            if ($s > $bestScore) { $bestScore = $s; $bestMove = $move; }
+            $newBoard = $board;
+            $newBoard[$move] = $player;
+            $moveValue = $minimax($newBoard, $player === 'X' ? 'O' : 'X', 0);
+            
+            if ($moveValue > $bestValue) {
+                $bestValue = $moveValue;
+                $bestMove = $move;
+            }
         }
+        
         return $bestMove;
     }
 
@@ -97,35 +120,109 @@ final class Engine
         return ($x === $o) ? 'X' : 'O';
     }
 
-    /** Easy AI: random move. */
+    /** Easy AI: Always takes wins, 30% chance for other smart moves, else random */
     public function aiEasy(array $board, string $player): int
     {
         $moves = $this->availableMoves($board);
+        
+        // ALWAYS try to win if possible (100% of the time)
+        foreach ($moves as $move) {
+            $testBoard = $board;
+            $testBoard[$move] = $player;
+            if ($this->winner($testBoard) === $player) {
+                return $move;
+            }
+        }
+        
+        // 30% chance of making another smart move (blocking)
+        if (mt_rand(1, 100) <= 30) {
+            $opponent = $player === 'X' ? 'O' : 'X';
+            
+            foreach ($moves as $move) {
+                $testBoard = $board;
+                $testBoard[$move] = $opponent;
+                if ($this->winner($testBoard) === $opponent) {
+                    return $move;
+                }
+            }
+        }
+        
+        // Otherwise random move
         return $moves[array_rand($moves)];
     }
 
-    /** Medium AI: 50% random, else block/win using simple heuristics. */
+    /** Medium AI: Blocks obvious wins, takes center/corners, but makes mistakes */
     public function aiMedium(array $board, string $player): int
     {
-        if (mt_rand(0, 1) === 0) {
-            return $this->aiEasy($board, $player);
+        $opponent = $player === 'X' ? 'O' : 'X';
+        $moves = $this->availableMoves($board);
+        
+        // 1. Always try to win
+        foreach ($moves as $move) {
+            $testBoard = $board;
+            $testBoard[$move] = $player;
+            if ($this->winner($testBoard) === $player) {
+                return $move;
+            }
         }
-        return $this->aiHard($board, $player);
+        
+        // 2. 80% chance to block opponent wins
+        if (mt_rand(1, 100) <= 80) {
+            foreach ($moves as $move) {
+                $testBoard = $board;
+                $testBoard[$move] = $opponent;
+                if ($this->winner($testBoard) === $opponent) {
+                    return $move;
+                }
+            }
+        }
+        
+        // 3. Take center if available
+        if (in_array(4, $moves)) {
+            return 4;
+        }
+        
+        // 4. Take corners with preference
+        $corners = [0, 2, 6, 8];
+        $availableCorners = array_intersect($corners, $moves);
+        if (!empty($availableCorners)) {
+            return $availableCorners[array_rand($availableCorners)];
+        }
+        
+        // 5. Take any edge
+        return $moves[array_rand($moves)];
     }
 
-    /** Hard AI: try winning move, then block, then center, corner, random. */
+    /** Hard AI: Strong strategic play with occasional suboptimal moves */
     public function aiHard(array $board, string $player): int
     {
         $opponent = $player === 'X' ? 'O' : 'X';
-        foreach ($this->availableMoves($board) as $m) {
-            $b = $board; $b[$m] = $player; if ($this->winner($b) === $player) return $m;
+        $moves = $this->availableMoves($board);
+        
+        // 1. Always try to win
+        foreach ($moves as $move) {
+            $testBoard = $board;
+            $testBoard[$move] = $player;
+            if ($this->winner($testBoard) === $player) {
+                return $move;
+            }
         }
-        foreach ($this->availableMoves($board) as $m) {
-            $b = $board; $b[$m] = $opponent; if ($this->winner($b) === $opponent) return $m;
+        
+        // 2. Always block opponent wins
+        foreach ($moves as $move) {
+            $testBoard = $board;
+            $testBoard[$move] = $opponent;
+            if ($this->winner($testBoard) === $opponent) {
+                return $move;
+            }
         }
-        if ($board[4] === null) return 4;
-        $corners = [0,2,6,8]; shuffle($corners);
-        foreach ($corners as $c) { if ($board[$c] === null) return $c; }
-        return $this->aiEasy($board, $player);
+        
+        // 3. 90% chance to play optimally, 10% chance for suboptimal move
+        if (mt_rand(1, 100) <= 90) {
+            return $this->bestMoveMinimax($board, $player);
+        }
+        
+        // 4. Fallback to medium-level strategy
+        return $this->aiMedium($board, $player);
     }
 }
