@@ -17,6 +17,7 @@ use App\Games\Tetris\TetrisGame;
 use App\Games\Minesweeper\MinesweeperGame;
 use App\Games\Poker\PokerGame;
 use App\Games\GoFish\GoFishGame;
+use App\Games\CrazyEights\CrazyEightsGame;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(new MinesweeperGame());
             $registry->register(new PokerGame());
             $registry->register(new GoFishGame());
+            $registry->register(new CrazyEightsGame());
             return $registry;
         });
     }
