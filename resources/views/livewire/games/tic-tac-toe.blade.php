@@ -124,6 +124,7 @@ new class extends Component {
     }
 }; ?>
 
+<div>
 <section class="max-w-2xl mx-auto p-6 select-none" x-data="{
     onTouchStart(e, pos) {
         e.preventDefault();
@@ -303,38 +304,39 @@ x-on:keydown.window="
         <a class="text-sm opacity-80 hover:opacity-100 underline" href="{{ url('/games') }}">← Back to Games</a>
     </div>
 </section>
-
-<style>
-    @keyframes cell-appear {
-        0% { transform: scale(0); opacity: 0; }
-        50% { transform: scale(1.2); opacity: 0.8; }
-        100% { transform: scale(1); opacity: 1; }
-    }
     
-    .cell-content {
-        animation: cell-appear 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    
-    .cell-number {
-        transition: opacity 0.2s ease-in-out;
-    }
-    
-    .game-cell:hover .cell-number {
-        opacity: 0.6;
-    }
-    
-    .game-board {
-        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .game-result {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
-        border-radius: 1rem;
-        padding: 1.5rem;
-        border: 1px solid rgba(59, 130, 246, 0.2);
-    }
-</style>
+    <style>
+        @keyframes cell-appear {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .cell-content {
+            animation: cell-appear 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .cell-number {
+            transition: opacity 0.2s ease-in-out;
+        }
+        
+        .game-cell:hover .cell-number {
+            opacity: 0.6;
+        }
+        
+        .game-board {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .game-result {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</div>
 
 

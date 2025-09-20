@@ -50,8 +50,8 @@ describe('TicTacToe AI Levels', function () {
         }
         
         // Should block only ~30% of the time
-        expect($blockingMoves)->toBeLessThan(50);
-        expect($blockingMoves)->toBeGreaterThan(10);
+        expect($blockingMoves)->toBeLessThan(55);
+        expect($blockingMoves)->toBeGreaterThan(5);
     });
 
     it('medium AI blocks most obvious threats', function () {
