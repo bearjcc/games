@@ -54,7 +54,7 @@ class SolitaireEngine
     /**
      * Initialize new Klondike Solitaire game
      */
-    public static function newGame(): array
+    public static function newGame($options = []): array
     {
         $deck = self::createDeck();
         shuffle($deck);
@@ -86,12 +86,18 @@ class SolitaireEngine
             ],
             'stock' => $stock,
             'waste' => [],
-            'score' => 0,
+            'score' => $options['scoringMode'] === 'vegas' ? -52 : 0, // Vegas starts at -$52
             'moves' => 0,
             'gameWon' => false,
             'gameTime' => 0,
-            'drawCount' => 3, // Draw 3 cards from stock
-            'wasteIndex' => -1 // Index of currently visible waste card
+            'drawCount' => $options['drawCount'] ?? 3, // Draw 1 or 3 cards from stock
+            'wasteIndex' => -1, // Index of currently visible waste card
+            'scoringMode' => $options['scoringMode'] ?? 'standard', // standard, vegas, timed
+            'difficulty' => $options['difficulty'] ?? 'normal', // easy, normal, hard
+            'timerPressure' => $options['timerPressure'] ?? false,
+            'perfectGame' => true, // Track if no mistakes made
+            'streakBonus' => 0,
+            'cardsToFoundation' => 0 // Track foundation moves for bonuses
         ];
     }
 
@@ -218,7 +224,15 @@ class SolitaireEngine
         // Add to foundation
         $state['foundations'][$suit][] = $wasteCard;
         $state['moves']++;
-        $state['score'] += 10; // Points for foundation
+        $state['cardsToFoundation']++;
+        
+        // Scoring based on mode
+        $scoringMode = $state['scoringMode'] ?? 'standard';
+        if ($scoringMode === 'vegas') {
+            $state['score'] += 5; // $5 per card in Vegas mode
+        } else {
+            $state['score'] += 10; // Standard points
+        }
 
         return $state;
     }
@@ -301,7 +315,15 @@ class SolitaireEngine
         // Add to foundation
         $state['foundations'][$suit][] = $card;
         $state['moves']++;
-        $state['score'] += 10; // Points for foundation
+        $state['cardsToFoundation']++;
+        
+        // Scoring based on mode
+        $scoringMode = $state['scoringMode'] ?? 'standard';
+        if ($scoringMode === 'vegas') {
+            $state['score'] += 5; // $5 per card in Vegas mode
+        } else {
+            $state['score'] += 10; // Standard points
+        }
 
         return $state;
     }
@@ -352,14 +374,35 @@ class SolitaireEngine
     }
 
     /**
-     * Calculate final score
+     * Calculate final score based on scoring mode
      */
     public static function getScore(array $state): int
     {
         $score = $state['score'];
+        $isWon = self::isGameWon($state);
+        $scoringMode = $state['scoringMode'] ?? 'standard';
+
+        switch ($scoringMode) {
+            case 'vegas':
+                return self::calculateVegasScore($state);
+                
+            case 'timed':
+                return self::calculateTimedScore($state);
+                
+            default: // standard
+                return self::calculateStandardScore($state);
+        }
+    }
+
+    /**
+     * Calculate standard scoring
+     */
+    private static function calculateStandardScore(array $state): int
+    {
+        $score = $state['score'];
 
         if (self::isGameWon($state)) {
-            $score += 500; // Bonus for winning
+            $score += 500; // Base win bonus
             
             // Time bonus (max 5 minutes for full bonus)
             $timeBonus = max(0, 300 - $state['gameTime']);
@@ -368,8 +411,68 @@ class SolitaireEngine
             // Move efficiency bonus
             $moveBonus = max(0, 200 - $state['moves']);
             $score += $moveBonus;
+            
+            // Perfect game bonus (no undo used)
+            if ($state['perfectGame'] ?? false) {
+                $score += 300;
+            }
+            
+            // Difficulty multiplier
+            $difficulty = $state['difficulty'] ?? 'normal';
+            $multiplier = match($difficulty) {
+                'easy' => 0.8,
+                'hard' => 1.5,
+                default => 1.0
+            };
+            
+            $score = (int)($score * $multiplier);
         }
 
+        return max(0, $score);
+    }
+
+    /**
+     * Calculate Vegas scoring (money-based)
+     */
+    private static function calculateVegasScore(array $state): int
+    {
+        // Vegas scoring: -$52 to start, +$5 per card to foundation
+        $score = -52 + ($state['cardsToFoundation'] * 5);
+        
+        if (self::isGameWon($state)) {
+            $score += 208; // Bonus for completing ($5 * 52 cards - $52 cost = $208 profit)
+        }
+        
+        return $score;
+    }
+
+    /**
+     * Calculate timed scoring with pressure
+     */
+    private static function calculateTimedScore(array $state): int
+    {
+        $score = $state['score'];
+        $gameTime = $state['gameTime'];
+        
+        // Time pressure penalties
+        if ($gameTime > 300) { // 5 minutes
+            $penalty = ($gameTime - 300) * 2; // 2 points per second over 5 minutes
+            $score -= $penalty;
+        }
+        
+        if (self::isGameWon($state)) {
+            // Time-based win bonus (more points for faster completion)
+            $timeBonus = max(0, 600 - $gameTime); // Up to 10 minutes
+            $score += $timeBonus * 2;
+            
+            // Speed bonus for very fast completion
+            if ($gameTime < 180) { // Under 3 minutes
+                $score += 500;
+            } elseif ($gameTime < 240) { // Under 4 minutes
+                $score += 300;
+            }
+        }
+        
         return max(0, $score);
     }
 

@@ -11,8 +11,16 @@ new class extends Component
     public $state;
     public $draggedCard = null;
     public $dragSource = null;
+    public $draggedCards = [];
     public $gameTime = 0;
     public $gameTimer = null;
+    public $draggedFromCol = null;
+    public $draggedFromIndex = null;
+    public $undoStack = [];
+    public $redoStack = [];
+    public $gameMode = 'standard';
+    public $difficulty = 'normal';
+    public $drawCount = 3;
 
     public function mount()
     {
@@ -21,37 +29,54 @@ new class extends Component
 
     public function resetGame()
     {
-        $this->state = SolitaireEngine::newGame();
+        $options = [
+            'scoringMode' => $this->gameMode,
+            'difficulty' => $this->difficulty,
+            'drawCount' => $this->drawCount,
+            'timerPressure' => $this->gameMode === 'timed'
+        ];
+        
+        $this->state = SolitaireEngine::newGame($options);
         $this->gameTime = 0;
         $this->draggedCard = null;
         $this->dragSource = null;
+        $this->draggedCards = [];
+        $this->draggedFromCol = null;
+        $this->draggedFromIndex = null;
+        $this->undoStack = [];
+        $this->redoStack = [];
     }
 
     public function drawFromStock()
     {
+        $this->saveStateForUndo();
         $this->state = SolitaireEngine::drawFromStock($this->state);
     }
 
     public function moveWasteToTableau($tableauCol)
     {
+        $this->saveStateForUndo();
         $this->state = SolitaireEngine::moveWasteToTableau($this->state, $tableauCol);
         $this->checkGameWon();
     }
 
     public function moveWasteToFoundation($suit)
     {
+        $this->saveStateForUndo();
         $this->state = SolitaireEngine::moveWasteToFoundation($this->state, $suit);
         $this->checkGameWon();
     }
 
     public function moveTableauToTableau($fromCol, $cardIndex, $toCol)
     {
+        $this->saveStateForUndo();
         $this->state = SolitaireEngine::moveTableauToTableau($this->state, $fromCol, $cardIndex, $toCol);
         $this->checkGameWon();
     }
 
     public function moveTableauToFoundation($fromCol, $suit)
     {
+        $this->saveStateForUndo();
         $this->state = SolitaireEngine::moveTableauToFoundation($this->state, $fromCol, $suit);
         $this->checkGameWon();
     }
@@ -68,6 +93,159 @@ new class extends Component
                 $this->moveTableauToFoundation($move['col'], $move['suit']);
             }
         }
+    }
+
+    public function startDragWaste()
+    {
+        $wasteCard = SolitaireEngine::getWasteCard($this->state);
+        if ($wasteCard) {
+            $this->draggedCard = $wasteCard;
+            $this->dragSource = 'waste';
+            $this->draggedCards = [$wasteCard];
+        }
+    }
+
+    public function startDragTableau($col, $index)
+    {
+        if (!isset($this->state['tableau'][$col][$index])) {
+            return;
+        }
+
+        $card = $this->state['tableau'][$col][$index];
+        if (!$card['faceUp']) {
+            return; // Can't drag face-down cards
+        }
+
+        // Get all cards from this index to the end (sequence)
+        $cards = array_slice($this->state['tableau'][$col], $index);
+        
+        // Validate that this is a valid sequence to drag
+        for ($i = 1; $i < count($cards); $i++) {
+            if (!SolitaireEngine::canPlaceOnTableau($cards[$i], $cards[$i-1])) {
+                return; // Invalid sequence
+            }
+        }
+
+        $this->draggedCard = $card;
+        $this->dragSource = 'tableau';
+        $this->draggedCards = $cards;
+        $this->draggedFromCol = $col;
+        $this->draggedFromIndex = $index;
+    }
+
+    public function dropOnFoundation($suit)
+    {
+        if (!$this->draggedCard) {
+            return;
+        }
+
+        if ($this->dragSource === 'waste') {
+            $this->moveWasteToFoundation($suit);
+        } elseif ($this->dragSource === 'tableau' && count($this->draggedCards) === 1) {
+            $this->moveTableauToFoundation($this->draggedFromCol, $suit);
+        }
+
+        $this->clearDrag();
+    }
+
+    public function dropOnTableau($toCol)
+    {
+        if (!$this->draggedCard) {
+            return;
+        }
+
+        if ($this->dragSource === 'waste') {
+            $this->moveWasteToTableau($toCol);
+        } elseif ($this->dragSource === 'tableau') {
+            $this->moveTableauToTableau($this->draggedFromCol, $this->draggedFromIndex, $toCol);
+        }
+
+        $this->clearDrag();
+    }
+
+    public function clearDrag()
+    {
+        $this->draggedCard = null;
+        $this->dragSource = null;
+        $this->draggedCards = [];
+        $this->draggedFromCol = null;
+        $this->draggedFromIndex = null;
+    }
+
+    public function saveStateForUndo()
+    {
+        // Save current state to undo stack
+        $this->undoStack[] = json_encode($this->state);
+        
+        // Clear redo stack when new move is made
+        $this->redoStack = [];
+        
+        // Limit undo stack size to prevent memory issues
+        if (count($this->undoStack) > 50) {
+            array_shift($this->undoStack);
+        }
+    }
+
+    public function undo()
+    {
+        if (empty($this->undoStack)) {
+            return;
+        }
+
+        // Save current state to redo stack
+        $this->redoStack[] = json_encode($this->state);
+        
+        // Restore previous state
+        $previousState = array_pop($this->undoStack);
+        $this->state = json_decode($previousState, true);
+        
+        // Clear any drag state
+        $this->clearDrag();
+    }
+
+    public function redo()
+    {
+        if (empty($this->redoStack)) {
+            return;
+        }
+
+        // Save current state to undo stack
+        $this->undoStack[] = json_encode($this->state);
+        
+        // Restore next state
+        $nextState = array_pop($this->redoStack);
+        $this->state = json_decode($nextState, true);
+        
+        // Clear any drag state
+        $this->clearDrag();
+    }
+
+    public function canUndo()
+    {
+        return !empty($this->undoStack);
+    }
+
+    public function canRedo()
+    {
+        return !empty($this->redoStack);
+    }
+
+    public function setGameMode($mode)
+    {
+        $this->gameMode = $mode;
+        $this->resetGame();
+    }
+
+    public function setDifficulty($difficulty)
+    {
+        $this->difficulty = $difficulty;
+        $this->resetGame();
+    }
+
+    public function setDrawCount($count)
+    {
+        $this->drawCount = $count;
+        $this->resetGame();
     }
 
     private function checkGameWon()
@@ -137,9 +315,14 @@ new class extends Component
                 <div class="card-pile waste-pile">
                     @php $wasteCard = $this->getWasteCard(); @endphp
                     @if($wasteCard)
-                        <div class="playing-card" 
+                        <div class="playing-card draggable-card card-flip-animation" 
                              style="background-image: url('{{ $this->getCardImageUrl($wasteCard) }}');"
-                             title="{{ $wasteCard['rank'] }} of {{ $wasteCard['suit'] }}">
+                             title="{{ $wasteCard['rank'] }} of {{ $wasteCard['suit'] }}"
+                             draggable="true"
+                             x-data
+                             @mousedown="$wire.startDragWaste()"
+                             @dragstart="$el.classList.add('dragging')"
+                             @dragend="$el.classList.remove('dragging'); $wire.clearDrag()">
                         </div>
                     @else
                         <div class="empty-pile waste-empty">
@@ -152,12 +335,15 @@ new class extends Component
             <!-- Foundations -->
             <div class="foundations-area">
                 @foreach(['hearts', 'diamonds', 'clubs', 'spades'] as $suit)
-                    <div class="foundation-pile foundation-{{ $suit }}" 
+                    <div class="foundation-pile foundation-{{ $suit }} drop-zone" 
                          wire:click="moveWasteToFoundation('{{ $suit }}')"
-                         title="{{ ucfirst($suit) }} Foundation">
+                         title="{{ ucfirst($suit) }} Foundation"
+                         x-data
+                         @dragover.prevent
+                         @drop="$wire.dropOnFoundation('{{ $suit }}')">
                         @if(!empty($state['foundations'][$suit]))
                             @php $topCard = end($state['foundations'][$suit]); @endphp
-                            <div class="playing-card" 
+                            <div class="playing-card card-stack-animation" 
                                  style="background-image: url('{{ $this->getCardImageUrl($topCard) }}');"
                                  title="{{ $topCard['rank'] }} of {{ $topCard['suit'] }}">
                             </div>
@@ -174,7 +360,11 @@ new class extends Component
         <!-- Tableau Area -->
         <div class="tableau-area">
             @for($col = 0; $col < 7; $col++)
-                <div class="tableau-column" data-col="{{ $col }}">
+                <div class="tableau-column drop-zone" 
+                     data-col="{{ $col }}"
+                     x-data
+                     @dragover.prevent
+                     @drop="$wire.dropOnTableau({{ $col }})">
                     @if(empty($state['tableau'][$col]))
                         <!-- Empty column - only accepts Kings -->
                         <div class="empty-pile tableau-empty" 
@@ -184,12 +374,21 @@ new class extends Component
                         </div>
                     @else
                         @foreach($state['tableau'][$col] as $index => $card)
-                            <div class="playing-card tableau-card {{ $card['faceUp'] ? 'face-up' : 'face-down' }}"
+                            <div class="playing-card tableau-card {{ $card['faceUp'] ? 'face-up' : 'face-down' }} 
+                                      {{ $card['faceUp'] ? 'draggable-card' : '' }}
+                                      {{ $card['faceUp'] && $index === count($state['tableau'][$col]) - 1 ? 'card-flip-animation' : '' }}"
                                  style="top: {{ $index * 20 }}px; background-image: url('{{ $this->getCardImageUrl($card) }}');"
                                  data-col="{{ $col }}" 
                                  data-index="{{ $index }}"
                                  wire:click="moveTableauToFoundation({{ $col }}, '{{ $card['suit'] }}')"
-                                 title="{{ $card['faceUp'] ? $card['rank'] . ' of ' . $card['suit'] : 'Face down card' }}">
+                                 title="{{ $card['faceUp'] ? $card['rank'] . ' of ' . $card['suit'] : 'Face down card' }}"
+                                 @if($card['faceUp']) 
+                                     draggable="true"
+                                     x-data
+                                     @mousedown="$wire.startDragTableau({{ $col }}, {{ $index }})"
+                                     @dragstart="$el.classList.add('dragging')"
+                                     @dragend="$el.classList.remove('dragging'); $wire.clearDrag()"
+                                 @endif>
                                 @if($card['faceUp'] && $index === count($state['tableau'][$col]) - 1)
                                     <!-- Add move indicators for top cards -->
                                     <div class="card-moves">
@@ -203,11 +402,54 @@ new class extends Component
             @endfor
         </div>
 
+        <!-- Game Settings -->
+        <div class="game-settings">
+            <div class="settings-row">
+                <div class="setting-group">
+                    <label class="setting-label">Scoring:</label>
+                    <select wire:change="setGameMode($event.target.value)" class="setting-select">
+                        <option value="standard" {{ $gameMode === 'standard' ? 'selected' : '' }}>Standard</option>
+                        <option value="vegas" {{ $gameMode === 'vegas' ? 'selected' : '' }}>Vegas ($)</option>
+                        <option value="timed" {{ $gameMode === 'timed' ? 'selected' : '' }}>Timed</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label class="setting-label">Difficulty:</label>
+                    <select wire:change="setDifficulty($event.target.value)" class="setting-select">
+                        <option value="easy" {{ $difficulty === 'easy' ? 'selected' : '' }}>Easy</option>
+                        <option value="normal" {{ $difficulty === 'normal' ? 'selected' : '' }}>Normal</option>
+                        <option value="hard" {{ $difficulty === 'hard' ? 'selected' : '' }}>Hard</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label class="setting-label">Draw:</label>
+                    <select wire:change="setDrawCount($event.target.value)" class="setting-select">
+                        <option value="1" {{ $drawCount == 1 ? 'selected' : '' }}>1 Card</option>
+                        <option value="3" {{ $drawCount == 3 ? 'selected' : '' }}>3 Cards</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <!-- Game Controls and Stats -->
         <div class="game-controls">
             <div class="control-section">
                 <button wire:click="resetGame" class="game-btn new-game-btn">
                     New Game
+                </button>
+                <button wire:click="undo" 
+                        class="game-btn undo-btn {{ $this->canUndo() ? '' : 'disabled' }}" 
+                        {{ $this->canUndo() ? '' : 'disabled' }}
+                        title="Undo last move (Ctrl+Z)">
+                    ↶ Undo
+                </button>
+                <button wire:click="redo" 
+                        class="game-btn redo-btn {{ $this->canRedo() ? '' : 'disabled' }}" 
+                        {{ $this->canRedo() ? '' : 'disabled' }}
+                        title="Redo last undone move (Ctrl+Y)">
+                    ↷ Redo
                 </button>
                 <button wire:click="autoMove" class="game-btn auto-move-btn">
                     Auto Move
@@ -434,6 +676,152 @@ new class extends Component
             justify-content: center;
         }
 
+        /* Drag and Drop Styles */
+        .draggable-card {
+            cursor: grab;
+        }
+
+        .draggable-card:active {
+            cursor: grabbing;
+        }
+
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(5deg) scale(0.9);
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .drop-zone {
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .drop-zone.drag-over {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px dashed #22c55e;
+            border-radius: 8px;
+        }
+
+        .drop-zone.invalid-drop {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px dashed #ef4444;
+            border-radius: 8px;
+        }
+
+        /* Enhanced dragging feedback */
+        .draggable-card:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.4),
+                0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Smooth transitions for all cards */
+        .playing-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                       box-shadow 0.2s ease, 
+                       opacity 0.2s ease,
+                       top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                       left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Enhanced animation effects */
+        .card-move-animation {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-flip-animation {
+            animation: cardFlip 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-stack-animation {
+            animation: stackCard 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes cardFlip {
+            0% { transform: perspective(800px) rotateY(-180deg); opacity: 0.5; }
+            50% { transform: perspective(800px) rotateY(-90deg); opacity: 0.8; }
+            100% { transform: perspective(800px) rotateY(0deg); opacity: 1; }
+        }
+
+        @keyframes stackCard {
+            0% { transform: translateY(-20px) scale(1.1); opacity: 0.8; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes foundationSuccess {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); }
+            100% { transform: scale(1); }
+        }
+
+        .foundation-success {
+            animation: foundationSuccess 0.4s ease-in-out;
+        }
+
+        /* Game Settings */
+        .game-settings {
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            background: rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .setting-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-label {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .setting-select {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            color: white;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .setting-select:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .setting-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .setting-select option {
+            background: #1e40af;
+            color: white;
+        }
+
         /* Game Controls */
         .game-controls {
             display: flex;
@@ -482,6 +870,35 @@ new class extends Component
 
         .auto-move-btn:hover {
             background: #16a34a;
+        }
+
+        .undo-btn {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .undo-btn:hover:not(.disabled) {
+            background: #2563eb;
+        }
+
+        .redo-btn {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .redo-btn:hover:not(.disabled) {
+            background: #7c3aed;
+        }
+
+        .game-btn.disabled {
+            background: #6b7280;
+            color: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .game-btn.disabled:hover {
+            background: #6b7280;
         }
 
         .stat-item {
@@ -583,4 +1000,31 @@ new class extends Component
             }
         }
     </style>
+
+    <!-- Keyboard Shortcuts -->
+    <script>
+        document.addEventListener('keydown', function(e) {
+            // Undo: Ctrl+Z
+            if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                if (@this.canUndo()) {
+                    @this.undo();
+                }
+            }
+            
+            // Redo: Ctrl+Y or Ctrl+Shift+Z
+            if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'Z')) {
+                e.preventDefault();
+                if (@this.canRedo()) {
+                    @this.redo();
+                }
+            }
+            
+            // Auto Move: Space
+            if (e.key === ' ' && !e.target.matches('input, textarea, button')) {
+                e.preventDefault();
+                @this.autoMove();
+            }
+        });
+    </script>
 </div>
