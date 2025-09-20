@@ -44,6 +44,10 @@ class HintEngine
                 $hints = self::getConnect4Hints($state, $options);
                 break;
                 
+            case 'checkers':
+                $hints = self::getCheckersHints($state, $options);
+                break;
+                
             default:
                 $hints = self::getGenericHints($game, $state, $options);
                 break;
@@ -986,5 +990,197 @@ class HintEngine
         }
         
         return $threats;
+    }
+
+    /**
+     * Get hints for Checkers
+     */
+    private static function getCheckersHints(array $state, array $options): array
+    {
+        $hints = [];
+        $currentPlayer = $state['currentPlayer'];
+
+        // Critical hint for mandatory captures
+        if ($state['mustCapture']) {
+            $hints[] = [
+                'type' => 'critical',
+                'priority' => 10,
+                'action' => 'mandatory_capture',
+                'description' => 'You must continue capturing!',
+                'reasoning' => 'Multiple captures in one turn are mandatory in checkers'
+            ];
+            return $hints;
+        }
+
+        // Look for capture opportunities
+        $validMoves = self::getCheckersValidMoves($state);
+        $captureMoves = array_filter($validMoves, function($move) {
+            return $move['type'] === 'capture';
+        });
+
+        if (!empty($captureMoves)) {
+            $bestCapture = self::findBestCapture($captureMoves, $state);
+            if ($bestCapture) {
+                $fromNotation = self::getSquareNotation($bestCapture['from']);
+                $toNotation = self::getSquareNotation($bestCapture['to']);
+                
+                $hints[] = [
+                    'type' => 'critical',
+                    'priority' => 9,
+                    'action' => 'capture_move',
+                    'description' => "Capture opportunity: {$fromNotation} to {$toNotation}",
+                    'reasoning' => 'Captures are mandatory when available'
+                ];
+            }
+        }
+
+        // Strategic hints for advancement
+        $advancementMoves = self::findAdvancementMoves($validMoves, $currentPlayer);
+        if (!empty($advancementMoves)) {
+            $bestAdvancement = $advancementMoves[0];
+            $fromNotation = self::getSquareNotation($bestAdvancement['from']);
+            $toNotation = self::getSquareNotation($bestAdvancement['to']);
+            
+            $hints[] = [
+                'type' => 'strategic',
+                'priority' => 7,
+                'action' => 'advancement',
+                'description' => "Advance piece: {$fromNotation} to {$toNotation}",
+                'reasoning' => 'Moving pieces forward creates promotion opportunities'
+            ];
+        }
+
+        // King protection hints
+        $kingMoves = self::findKingMoves($validMoves, $state);
+        if (!empty($kingMoves)) {
+            $hints[] = [
+                'type' => 'tactical',
+                'priority' => 6,
+                'action' => 'king_strategy',
+                'description' => 'Use your king\'s backward movement ability',
+                'reasoning' => 'Kings can move both directions for strategic advantage'
+            ];
+        }
+
+        // Center control hint
+        $centerMoves = self::findCenterControlMoves($validMoves);
+        if (!empty($centerMoves)) {
+            $hints[] = [
+                'type' => 'strategic',
+                'priority' => 5,
+                'action' => 'center_control',
+                'description' => 'Control the center of the board',
+                'reasoning' => 'Central positions offer more movement options'
+            ];
+        }
+
+        return $hints;
+    }
+
+    /**
+     * Get valid moves for Checkers (simplified for hints)
+     */
+    private static function getCheckersValidMoves(array $state): array
+    {
+        // This would integrate with CheckersEngine::getValidMoves()
+        // For now, return empty array to prevent errors
+        return [];
+    }
+
+    /**
+     * Find best capture move
+     */
+    private static function findBestCapture(array $captureMoves, array $state): ?array
+    {
+        if (empty($captureMoves)) {
+            return null;
+        }
+
+        // Prefer captures that lead to multiple jumps
+        foreach ($captureMoves as $move) {
+            if (isset($move['hasAdditionalJumps']) && $move['hasAdditionalJumps']) {
+                return $move;
+            }
+        }
+
+        // Return first capture if no multi-jumps
+        return $captureMoves[0];
+    }
+
+    /**
+     * Find advancement moves toward promotion
+     */
+    private static function findAdvancementMoves(array $moves, string $player): array
+    {
+        $advancementMoves = [];
+        
+        foreach ($moves as $move) {
+            if ($move['type'] === 'move') {
+                [$fromRow, $fromCol] = $move['from'];
+                [$toRow, $toCol] = $move['to'];
+                
+                // Check if move advances toward promotion
+                if ($player === 'red' && $toRow < $fromRow) {
+                    $advancementMoves[] = $move;
+                } elseif ($player === 'black' && $toRow > $fromRow) {
+                    $advancementMoves[] = $move;
+                }
+            }
+        }
+        
+        return $advancementMoves;
+    }
+
+    /**
+     * Find moves involving kings
+     */
+    private static function findKingMoves(array $moves, array $state): array
+    {
+        $kingMoves = [];
+        $board = $state['board'];
+        
+        foreach ($moves as $move) {
+            [$fromRow, $fromCol] = $move['from'];
+            $piece = $board[$fromRow][$fromCol];
+            
+            if (strpos($piece, '_king') !== false) {
+                $kingMoves[] = $move;
+            }
+        }
+        
+        return $kingMoves;
+    }
+
+    /**
+     * Find moves that control center squares
+     */
+    private static function findCenterControlMoves(array $moves): array
+    {
+        $centerMoves = [];
+        $centerSquares = [[3, 2], [3, 4], [4, 3], [4, 5]]; // Center-ish dark squares
+        
+        foreach ($moves as $move) {
+            [$toRow, $toCol] = $move['to'];
+            
+            foreach ($centerSquares as $centerSquare) {
+                if ($centerSquare[0] === $toRow && $centerSquare[1] === $toCol) {
+                    $centerMoves[] = $move;
+                    break;
+                }
+            }
+        }
+        
+        return $centerMoves;
+    }
+
+    /**
+     * Convert square coordinates to notation (A1, B2, etc.)
+     */
+    private static function getSquareNotation(array $square): string
+    {
+        [$row, $col] = $square;
+        $colLetter = chr(ord('A') + $col);
+        $rowNumber = 8 - $row;
+        return $colLetter . $rowNumber;
     }
 }

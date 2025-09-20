@@ -17,6 +17,7 @@ new class extends Component {
         
         // Feature the most impressive games first
         $this->featuredGames = [
+            $this->findGame('checkers'),
             $this->findGame('connect4'),
             $this->findGame('solitaire'), 
             $this->findGame('nine-mens-morris'),
@@ -30,7 +31,7 @@ new class extends Component {
         $this->stats = [
             'total_games' => count($this->games),
             'game_types' => ['Strategy', 'Puzzle', 'Card', 'Board'],
-            'ai_levels' => 16, // Total AI difficulty levels across all games
+            'ai_levels' => 20, // Total AI difficulty levels across all games (4 for each AI game)
             'features' => ['Undo/Redo', 'Hint System', 'AI Opponents', 'Auto-Play Demos']
         ];
     }
@@ -56,6 +57,7 @@ new class extends Component {
     public function getGameIcon($slug): string
     {
         return match($slug) {
+            'checkers' => '🟢',
             'connect4' => '🔴',
             'solitaire' => '🃏',
             'nine-mens-morris' => '⚫',
@@ -70,6 +72,7 @@ new class extends Component {
     public function getGameGradient($slug): string
     {
         return match($slug) {
+            'checkers' => 'from-green-600 to-emerald-700',
             'connect4' => 'from-red-500 to-yellow-500',
             'solitaire' => 'from-green-600 to-blue-600',
             'nine-mens-morris' => 'from-purple-600 to-indigo-600',
@@ -84,6 +87,7 @@ new class extends Component {
     public function getGameFeatures($slug): array
     {
         return match($slug) {
+            'checkers' => ['4 AI Difficulty Levels', 'Drag & Drop Pieces', 'Kings & Captures', 'Traditional Rules'],
             'connect4' => ['4 AI Difficulty Levels', 'Pass & Play Mode', 'Animated Drops', 'Best Move Hints'],
             'solitaire' => ['Drag & Drop Cards', 'Undo/Redo System', 'Multiple Scoring Modes', 'Auto-Move Detection'],
             'nine-mens-morris' => ['3-Phase Gameplay', 'Strategic AI', 'Mill Detection', 'Professional Board'],

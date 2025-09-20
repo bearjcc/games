@@ -39,6 +39,9 @@
                         <!-- Dropdown -->
                         <div class="absolute left-0 mt-2 w-48 bg-slate-800/95 backdrop-blur-lg rounded-lg shadow-xl border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                             <div class="py-2">
+                                <a href="{{ url('/checkers') }}" class="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200">
+                                    ⚫ Checkers
+                                </a>
                                 <a href="{{ url('/connect4') }}" class="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200">
                                     🔴 Connect 4
                                 </a>
@@ -131,6 +134,7 @@
             <div class="px-3 py-2">
                 <div class="text-gray-400 text-sm font-medium mb-2">Quick Play</div>
                 <div class="space-y-1">
+                    <a href="{{ url('/checkers') }}" class="block text-white hover:text-blue-300 py-1 text-sm">⚫ Checkers</a>
                     <a href="{{ url('/connect4') }}" class="block text-white hover:text-blue-300 py-1 text-sm">🔴 Connect 4</a>
                     <a href="{{ url('/solitaire') }}" class="block text-white hover:text-blue-300 py-1 text-sm">🃏 Solitaire</a>
                     <a href="{{ url('/tic-tac-toe') }}" class="block text-white hover:text-blue-300 py-1 text-sm">❌ Tic Tac Toe</a>

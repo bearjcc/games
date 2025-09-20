@@ -78,6 +78,7 @@ new class extends Component {
 if (!method_exists($this, 'getGameIcon')) {
     function getGameIcon($slug): string {
         return match($slug) {
+            'checkers' => '🟢',
             'connect4' => '🔴',
             'solitaire' => '🃏',
             'nine-mens-morris' => '⚫',
@@ -93,6 +94,7 @@ if (!method_exists($this, 'getGameIcon')) {
 if (!method_exists($this, 'getGameGradient')) {
     function getGameGradient($slug): string {
         return match($slug) {
+            'checkers' => 'from-green-600 to-emerald-700',
             'connect4' => 'from-red-500 to-yellow-500',
             'solitaire' => 'from-green-600 to-blue-600',
             'nine-mens-morris' => 'from-purple-600 to-indigo-600',
@@ -108,6 +110,7 @@ if (!method_exists($this, 'getGameGradient')) {
 if (!method_exists($this, 'getGameFeatures')) {
     function getGameFeatures($slug): array {
         return match($slug) {
+            'checkers' => ['4 AI Difficulty Levels', 'Drag & Drop Pieces', 'Kings & Captures', 'Traditional Rules'],
             'connect4' => ['4 AI Difficulty Levels', 'Pass & Play Mode', 'Animated Drops', 'Best Move Hints'],
             'solitaire' => ['Drag & Drop Cards', 'Undo/Redo System', 'Multiple Scoring Modes', 'Auto-Move Detection'],
             'nine-mens-morris' => ['3-Phase Gameplay', 'Strategic AI', 'Mill Detection', 'Professional Board'],
