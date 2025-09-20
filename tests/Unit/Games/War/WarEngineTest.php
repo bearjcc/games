@@ -252,4 +252,18 @@ describe('WarEngine', function () {
 
         expect($score)->toBe(0);
     });
+
+    it('returns correct card image filename', function () {
+        $card = ['suit' => 'hearts', 'rank' => 'A', 'value' => 14];
+        $filename = WarEngine::getCardSprite($card);
+        expect($filename)->toBe('cardHeartsA.png');
+
+        $card2 = ['suit' => 'clubs', 'rank' => '10', 'value' => 10];
+        $filename2 = WarEngine::getCardSprite($card2);
+        expect($filename2)->toBe('cardClubs10.png');
+
+        $card3 = ['suit' => 'diamonds', 'rank' => 'K', 'value' => 13];
+        $filename3 = WarEngine::getCardSprite($card3);
+        expect($filename3)->toBe('cardDiamondsK.png');
+    });
 });

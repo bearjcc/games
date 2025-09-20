@@ -149,21 +149,18 @@ class WarEngine
     }
 
     /**
-     * Get card sprite position for CSS
+     * Get card image filename
      */
-    public static function getCardSprite(array $card): array
+    public static function getCardSprite(array $card): string
     {
-        $suitOrder = ['hearts', 'diamonds', 'clubs', 'spades'];
-        $rankOrder = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        // Convert suit to capitalized format for filename
+        $suitName = ucfirst($card['suit']);
         
-        $suitIndex = array_search($card['suit'], $suitOrder);
-        $rankIndex = array_search($card['rank'], $rankOrder);
+        // Use rank directly - matches the file naming pattern
+        $rank = $card['rank'];
         
-        // Sprite sheet is 1170px wide (13 cards × 90px) and 504px tall (4 suits × 126px)
-        return [
-            'x' => $rankIndex * -90, // 90px card width to match CSS background-size
-            'y' => $suitIndex * -126  // 126px card height to match CSS background-size  
-        ];
+        // Return the individual card image filename
+        return "card{$suitName}{$rank}.png";
     }
 
     /**

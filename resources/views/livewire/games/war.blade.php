@@ -72,8 +72,8 @@ new class extends Component
     {
         if (!$card) return '';
         
-        $sprite = WarEngine::getCardSprite($card);
-        return "background-position: {$sprite['x']}px {$sprite['y']}px;";
+        $filename = WarEngine::getCardSprite($card);
+        return "background-image: url('/images/Cards/{$filename}'); background-size: cover; background-position: center;";
     }
 
     public function getStats()
@@ -238,8 +238,6 @@ new class extends Component
     .playing-card {
         width: 90px;
         height: 126px;
-        background-image: url('/images/playingCards.svg');
-        background-size: 1170px 504px;
         background-repeat: no-repeat;
         border-radius: 8px;
         border: 1px solid rgba(255,255,255,0.1);
@@ -247,7 +245,6 @@ new class extends Component
             0 8px 24px rgba(0,0,0,0.4),
             0 4px 12px rgba(0,0,0,0.2),
             inset 0 1px 0 rgba(255,255,255,0.1);
-        /* Removed transition to prevent background-position wandering */
         position: relative;
     }
 
