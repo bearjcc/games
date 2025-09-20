@@ -40,6 +40,10 @@ class HintEngine
                 $hints = self::getPegSolitaireHints($state, $options);
                 break;
                 
+            case 'connect4':
+                $hints = self::getConnect4Hints($state, $options);
+                break;
+                
             default:
                 $hints = self::getGenericHints($game, $state, $options);
                 break;
@@ -742,5 +746,245 @@ class HintEngine
         }
         
         return $validMoves;
+    }
+
+    /**
+     * Get hints for Connect 4
+     */
+    private static function getConnect4Hints(array $state, array $options): array
+    {
+        $hints = [];
+        $currentPlayer = $state['currentPlayer'];
+        $opponent = $currentPlayer === 'red' ? 'yellow' : 'red';
+
+        // Check for immediate winning moves
+        $winningMove = self::findConnect4WinningMove($state, $currentPlayer);
+        if ($winningMove !== null) {
+            $hints[] = [
+                'type' => 'critical',
+                'priority' => 10,
+                'action' => 'winning_move',
+                'description' => "Drop in column " . ($winningMove + 1) . " to win!",
+                'reasoning' => 'Always take the winning move when available'
+            ];
+            return $hints; // Return immediately for winning moves
+        }
+
+        // Check for blocking moves
+        $blockingMove = self::findConnect4WinningMove($state, $opponent);
+        if ($blockingMove !== null) {
+            $hints[] = [
+                'type' => 'defensive',
+                'priority' => 9,
+                'action' => 'blocking_move',
+                'description' => "Block opponent by dropping in column " . ($blockingMove + 1),
+                'reasoning' => 'Prevent opponent from winning'
+            ];
+        }
+
+        // Strategic hints
+        $centerColumns = [2, 3, 4]; // Columns 3, 4, 5 (1-indexed)
+        $validMoves = self::getConnect4ValidMoves($state);
+        
+        $centerAvailable = array_intersect($centerColumns, $validMoves);
+        if (!empty($centerAvailable)) {
+            $bestCenter = $centerAvailable[0];
+            $hints[] = [
+                'type' => 'strategic',
+                'priority' => 7,
+                'action' => 'center_strategy',
+                'description' => "Consider column " . ($bestCenter + 1) . " for center control",
+                'reasoning' => 'Center columns provide more winning opportunities'
+            ];
+        }
+
+        // Look for two-in-a-row setups
+        $setupMove = self::findConnect4SetupMove($state, $currentPlayer);
+        if ($setupMove !== null) {
+            $hints[] = [
+                'type' => 'tactical',
+                'priority' => 6,
+                'action' => 'setup_move',
+                'description' => "Column " . ($setupMove + 1) . " creates multiple threats",
+                'reasoning' => 'Setting up multiple winning possibilities'
+            ];
+        }
+
+        // Avoid giving opponent advantages
+        $dangerousMove = self::findConnect4DangerousMove($state, $currentPlayer);
+        if ($dangerousMove !== null) {
+            $hints[] = [
+                'type' => 'defensive',
+                'priority' => 5,
+                'action' => 'avoid_danger',
+                'description' => "Avoid column " . ($dangerousMove + 1) . " - helps opponent",
+                'reasoning' => 'This move would give opponent a winning opportunity'
+            ];
+        }
+
+        return $hints;
+    }
+
+    /**
+     * Find winning move for Connect 4
+     */
+    private static function findConnect4WinningMove(array $state, string $player): ?int
+    {
+        for ($col = 0; $col < 7; $col++) {
+            if (self::canDropInConnect4Column($state, $col)) {
+                $row = self::getConnect4LowestRow($state, $col);
+                if ($row !== -1) {
+                    // Simulate the move
+                    $testState = $state;
+                    $testState['board'][$row][$col] = $player;
+                    
+                    // Check if this creates a win
+                    if (self::checkConnect4Win($testState, $row, $col, $player)) {
+                        return $col;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find setup move that creates multiple threats
+     */
+    private static function findConnect4SetupMove(array $state, string $player): ?int
+    {
+        $bestCol = null;
+        $maxThreats = 0;
+
+        for ($col = 0; $col < 7; $col++) {
+            if (self::canDropInConnect4Column($state, $col)) {
+                $row = self::getConnect4LowestRow($state, $col);
+                if ($row !== -1) {
+                    // Count potential threats after this move
+                    $testState = $state;
+                    $testState['board'][$row][$col] = $player;
+                    $threats = self::countConnect4Threats($testState, $player);
+                    
+                    if ($threats > $maxThreats) {
+                        $maxThreats = $threats;
+                        $bestCol = $col;
+                    }
+                }
+            }
+        }
+
+        return $maxThreats > 2 ? $bestCol : null;
+    }
+
+    /**
+     * Find dangerous moves that help opponent
+     */
+    private static function findConnect4DangerousMove(array $state, string $player): ?int
+    {
+        $opponent = $player === 'red' ? 'yellow' : 'red';
+
+        for ($col = 0; $col < 7; $col++) {
+            if (self::canDropInConnect4Column($state, $col)) {
+                $row = self::getConnect4LowestRow($state, $col);
+                if ($row !== -1 && $row > 0) {
+                    // Check if dropping here gives opponent a winning opportunity above
+                    $testState = $state;
+                    $testState['board'][$row][$col] = $player;
+                    
+                    // Now check if opponent can win by playing above this piece
+                    $testState['board'][$row - 1][$col] = $opponent;
+                    if (self::checkConnect4Win($testState, $row - 1, $col, $opponent)) {
+                        return $col;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Helper methods for Connect 4 analysis
+     */
+    private static function canDropInConnect4Column(array $state, int $col): bool
+    {
+        return $col >= 0 && $col < 7 && $state['board'][0][$col] === null;
+    }
+
+    private static function getConnect4LowestRow(array $state, int $col): int
+    {
+        for ($row = 5; $row >= 0; $row--) {
+            if ($state['board'][$row][$col] === null) {
+                return $row;
+            }
+        }
+        return -1;
+    }
+
+    private static function getConnect4ValidMoves(array $state): array
+    {
+        $validMoves = [];
+        for ($col = 0; $col < 7; $col++) {
+            if (self::canDropInConnect4Column($state, $col)) {
+                $validMoves[] = $col;
+            }
+        }
+        return $validMoves;
+    }
+
+    private static function checkConnect4Win(array $state, int $row, int $col, string $player): bool
+    {
+        $directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+
+        foreach ($directions as $direction) {
+            $count = 1; // Count the current piece
+            $deltaRow = $direction[0];
+            $deltaCol = $direction[1];
+
+            // Check positive direction
+            $r = $row + $deltaRow;
+            $c = $col + $deltaCol;
+            while ($r >= 0 && $r < 6 && $c >= 0 && $c < 7 && $state['board'][$r][$c] === $player) {
+                $count++;
+                $r += $deltaRow;
+                $c += $deltaCol;
+            }
+
+            // Check negative direction
+            $r = $row - $deltaRow;
+            $c = $col - $deltaCol;
+            while ($r >= 0 && $r < 6 && $c >= 0 && $c < 7 && $state['board'][$r][$c] === $player) {
+                $count++;
+                $r -= $deltaRow;
+                $c -= $deltaCol;
+            }
+
+            if ($count >= 4) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static function countConnect4Threats(array $state, string $player): int
+    {
+        $threats = 0;
+        
+        // This is a simplified threat counting - could be enhanced
+        for ($col = 0; $col < 7; $col++) {
+            if (self::canDropInConnect4Column($state, $col)) {
+                $row = self::getConnect4LowestRow($state, $col);
+                if ($row !== -1) {
+                    $testState = $state;
+                    $testState['board'][$row][$col] = $player;
+                    if (self::checkConnect4Win($testState, $row, $col, $player)) {
+                        $threats++;
+                    }
+                }
+            }
+        }
+        
+        return $threats;
     }
 }
