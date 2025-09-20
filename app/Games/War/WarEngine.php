@@ -195,6 +195,34 @@ class WarEngine
     }
 
     /**
+     * Play the entire game automatically
+     */
+    public static function autoplayGame(array $state): array
+    {
+        $maxRounds = 1000; // Prevent infinite loops
+        $rounds = 0;
+        
+        while (!$state['gameOver'] && $rounds < $maxRounds) {
+            $state = self::playRound($state);
+            $rounds++;
+            
+            // Small delay to prevent browser freezing
+            if ($rounds % 10 === 0) {
+                usleep(10000); // 10ms delay every 10 rounds
+            }
+        }
+        
+        // Ensure game is marked as over if we hit max rounds
+        if ($rounds >= $maxRounds && !$state['gameOver']) {
+            $state['gameOver'] = true;
+            $state['winner'] = count($state['playerDeck']) > count($state['aiDeck']) ? 'player' : 'ai';
+            $state['message'] = 'Game ended after maximum rounds';
+        }
+        
+        return $state;
+    }
+
+    /**
      * Generate score based on game performance
      */
     public static function calculateScore(array $state): int

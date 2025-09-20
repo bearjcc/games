@@ -118,4 +118,12 @@ class WarGame implements GameInterface
     {
         return WarEngine::getStats($state);
     }
+
+    /**
+     * Autoplay the entire game
+     */
+    public function autoplay(array $state): array
+    {
+        return WarEngine::autoplayGame($state);
+    }
 }

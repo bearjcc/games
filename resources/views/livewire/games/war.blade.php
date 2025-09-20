@@ -80,6 +80,31 @@ new class extends Component
     {
         return WarEngine::getStats($this->state);
     }
+
+    public function autoplay()
+    {
+        if ($this->state['gameOver']) {
+            return;
+        }
+
+        $game = new WarGame();
+        $this->state = $game->autoplay($this->state);
+        $this->isPlaying = false;
+        $this->canPlay = false;
+        $this->showCards = true;
+        
+        // Update best score if user is authenticated
+        if ($this->state['gameOver'] && auth()->check()) {
+            $score = $game->getScore($this->state);
+            if ($score > 0) {
+                app(UserBestScoreService::class)->updateIfBetter(
+                    auth()->user(),
+                    'war',
+                    $score
+                );
+            }
+        }
+    }
 }; ?>
 
 <div>
@@ -213,13 +238,15 @@ new class extends Component
             <button wire:click="resetGame" class="game-button">
                 New Game
             </button>
+            @if(!$state['gameOver'])
+                <button wire:click="autoplay" class="game-button bg-blue-600 hover:bg-blue-700 text-white">
+                    Autoplay
+                </button>
+            @endif
         </div>
-        
-</section>
     </x-game.layout>
-</div>
-
-<style>
+    
+    <style>
     /* War game specific liminal styling */
     .war-game-board {
         display: grid;
