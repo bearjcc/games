@@ -13,6 +13,9 @@ use App\Games\Sudoku\SudokuGame;
 use App\Games\Blackjack\BlackjackGame;
 use App\Games\Snake\SnakeGame;
 use App\Games\Memory\MemoryGame;
+use App\Games\Tetris\TetrisGame;
+use App\Games\Minesweeper\MinesweeperGame;
+use App\Games\Poker\PokerGame;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,6 +41,9 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(new BlackjackGame());
             $registry->register(new SnakeGame());
             $registry->register(new MemoryGame());
+            $registry->register(new TetrisGame());
+            $registry->register(new MinesweeperGame());
+            $registry->register(new PokerGame());
             return $registry;
         });
     }

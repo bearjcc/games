@@ -37,5 +37,8 @@ Volt::route('sudoku', 'games.sudoku')->name('sudoku');
 Volt::route('blackjack', 'games.blackjack')->name('blackjack');
 Volt::route('snake', 'games.snake')->name('snake');
 Volt::route('memory', 'games.memory')->name('memory');
+Volt::route('tetris', 'games.tetris')->name('tetris');
+Volt::route('minesweeper', 'games.minesweeper')->name('minesweeper');
+Volt::route('poker', 'games.poker')->name('poker');
 
 require __DIR__.'/auth.php';
