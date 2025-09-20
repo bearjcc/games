@@ -67,13 +67,18 @@ describe('2048 Game Feature', function () {
         
         $content = $response->getContent();
         
-        // Check for grid layout
-        expect($content)->toContain('grid-cols-4');
+        // Check for proper game container and grid structure
+        expect($content)->toContain('game-container');
+        expect($content)->toContain('grid-container');
+        expect($content)->toContain('tile-container');
         
-        // Check for tile styling classes that are actually present
-        expect($content)->toContain('bg-gray-300'); // Empty tiles
-        expect($content)->toContain('bg-gray-100'); // Initial 2 tiles
-        expect($content)->toContain('transition-all'); // Smooth animations
-        expect($content)->toContain('rounded'); // Rounded corners
+        // Check for authentic 2048 colors
+        expect($content)->toContain('#bbada0'); // Game background
+        expect($content)->toContain('#eee4da'); // Tile 2 color
+        expect($content)->toContain('rgba(238, 228, 218, 0.35)'); // Empty grid cells
+        
+        // Check for proper positioning and transitions
+        expect($content)->toContain('position: absolute');
+        expect($content)->toContain('transition: all 0.15s ease-in-out');
     });
 });

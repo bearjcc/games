@@ -82,40 +82,92 @@ new class extends Component {
         </div>
     @endif
     
-    <div class="grid grid-cols-4 gap-3 bg-gray-200 dark:bg-gray-800 p-3 rounded-lg">
-        @foreach ($board as $i => $tile)
-            <div class="h-20 w-20 flex items-center justify-center rounded font-bold text-lg transition-all duration-150
-                @if($tile === 0) 
-                    bg-gray-300 dark:bg-gray-700 text-transparent
-                @elseif($tile === 2) 
-                    bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200
-                @elseif($tile === 4)
-                    bg-gray-200 dark:bg-gray-500 text-gray-800 dark:text-gray-200
-                @elseif($tile === 8)
-                    bg-orange-300 text-white
-                @elseif($tile === 16)
-                    bg-orange-400 text-white
-                @elseif($tile === 32)
-                    bg-orange-500 text-white
-                @elseif($tile === 64)
-                    bg-red-400 text-white
-                @elseif($tile === 128)
-                    bg-yellow-400 text-white text-base
-                @elseif($tile === 256)
-                    bg-yellow-500 text-white text-base
-                @elseif($tile === 512)
-                    bg-yellow-600 text-white text-sm
-                @elseif($tile === 1024)
-                    bg-yellow-700 text-white text-sm
-                @elseif($tile === 2048)
-                    bg-yellow-800 text-white text-sm animate-pulse
-                @else
-                    bg-purple-600 text-white text-sm
-                @endif">
-                {{ $tile === 0 ? '' : number_format($tile) }}
-            </div>
-        @endforeach
+    <!-- Game Grid with proper layout -->
+    <div class="game-container mx-auto" style="width: 350px; height: 350px; position: relative; background-color: #bbada0; border-radius: 10px; padding: 10px;">
+        <div class="grid-container" style="position: absolute; z-index: 1;">
+            @for ($i = 0; $i < 16; $i++)
+                <div class="grid-cell" style="
+                    position: absolute;
+                    width: 70px;
+                    height: 70px;
+                    background-color: rgba(238, 228, 218, 0.35);
+                    border-radius: 3px;
+                    top: {{ floor($i / 4) * 80 + 10 }}px;
+                    left: {{ ($i % 4) * 80 + 10 }}px;
+                "></div>
+            @endfor
+        </div>
+        <div class="tile-container" style="position: absolute; z-index: 2;">
+            @foreach ($board as $i => $tile)
+                @if($tile > 0)
+                    <div class="tile tile-{{ $tile }}" style="
+                        position: absolute;
+                        width: 70px;
+                        height: 70px;
+                        border-radius: 3px;
+                        font-weight: bold;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        transition: all 0.15s ease-in-out;
+                        top: {{ floor($i / 4) * 80 + 10 }}px;
+                        left: {{ ($i % 4) * 80 + 10 }}px;
+                        @if($tile === 2)
+                            background-color: #eee4da; color: #776e65; font-size: 18px;
+                        @elseif($tile === 4)
+                            background-color: #ede0c8; color: #776e65; font-size: 18px;
+                        @elseif($tile === 8)
+                            background-color: #f2b179; color: #f9f6f2; font-size: 18px;
+                        @elseif($tile === 16)
+                            background-color: #f59563; color: #f9f6f2; font-size: 17px;
+                        @elseif($tile === 32)
+                            background-color: #f67c5f; color: #f9f6f2; font-size: 17px;
+                        @elseif($tile === 64)
+                            background-color: #f65e3b; color: #f9f6f2; font-size: 17px;
+                        @elseif($tile === 128)
+                            background-color: #edcf72; color: #f9f6f2; font-size: 15px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.14286);
+                        @elseif($tile === 256)
+                            background-color: #edcc61; color: #f9f6f2; font-size: 15px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.24), inset 0 0 0 1px rgba(255, 255, 255, 0.19048);
+                        @elseif($tile === 512)
+                            background-color: #edc850; color: #f9f6f2; font-size: 15px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.23810);
+                        @elseif($tile === 1024)
+                            background-color: #edc53f; color: #f9f6f2; font-size: 13px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.28571);
+                        @elseif($tile === 2048)
+                            background-color: #edc22e; color: #f9f6f2; font-size: 13px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.33333); animation: tile-glow 1.5s ease-in-out infinite alternate;
+                        @else
+                            background-color: #3c3a32; color: #f9f6f2; font-size: 11px;
+                        @endif
+                    ">{{ number_format($tile) }}</div>
+                @endif
+            @endforeach
+        </div>
     </div>
+    
+    <style>
+        @keyframes tile-glow {
+            0% { 
+                box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.33333);
+                transform: scale(1);
+            }
+            100% { 
+                box-shadow: 0 0 40px 15px rgba(243, 215, 116, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+                transform: scale(1.02);
+            }
+        }
+        
+        .game-container {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tile {
+            font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+            user-select: none;
+        }
+        
+        .tile:hover {
+            transform: scale(1.05) !important;
+        }
+    </style>
     <div class="mt-6 text-center">
         <div class="text-sm opacity-80 mb-3">Use arrow keys or WASD to play</div>
         <div class="flex justify-center gap-2">
