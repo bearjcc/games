@@ -82,6 +82,7 @@ new class extends Component
     }
 }; ?>
 
+<div>
 <x-game.layout title="War" description="Classic high-card wins battle. Prepare for war when cards tie!">
     <x-game.accessibility>
         @if($state['gameOver'])
@@ -272,13 +273,12 @@ new class extends Component
             </details>
         </div>
     </div>
-</x-game.layout>
 
-<style>
+    <style>
     .playing-card {
         width: 72px;
         height: 96px;
-        background-image: url('{{ Vite::asset('resources/img/playingCards.svg') }}');
+        background-image: url('{{ asset('resources/img/playingCards.svg') }}');
         background-size: 936px 384px; /* 13 cards × 72px, 4 suits × 96px */
         border-radius: 8px;
         border: 2px solid #fff;
@@ -287,7 +287,7 @@ new class extends Component
     }
 
     .card-back {
-        background-image: url('{{ Vite::asset('resources/img/playingCards_back.svg') }}');
+        background-image: url('{{ asset('resources/img/playingCards_back.svg') }}');
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
@@ -348,4 +348,6 @@ new class extends Component
             height: 80px;
         }
     }
-</style>
+    </style>
+</x-game.layout>
+</div>
