@@ -22,6 +22,7 @@ use App\Games\SpiderSolitaire\SpiderSolitaireGame;
 use App\Games\Farkle\FarkleGame;
 use App\Games\Mastermind\MastermindGame;
 use App\Games\Phase10\Phase10Game;
+use App\Games\WordDetective\WordDetectiveGame;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -56,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(new FarkleGame());
             $registry->register(new MastermindGame());
             $registry->register(new Phase10Game());
+            $registry->register(new WordDetectiveGame());
             return $registry;
         });
     }
