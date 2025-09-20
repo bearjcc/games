@@ -33,5 +33,6 @@ Volt::route('connect4', 'games.connect4')->name('connect4');
 Volt::route('checkers', 'games.checkers')->name('checkers');
 Volt::route('chess', 'games.chess')->name('chess');
 Volt::route('yahtzee', 'games.yahtzee')->name('yahtzee');
+Volt::route('sudoku', 'games.sudoku')->name('sudoku');
 
 require __DIR__.'/auth.php';
