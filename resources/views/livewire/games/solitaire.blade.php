@@ -290,11 +290,10 @@ new class extends Component
     public function getCardImageUrl($card)
     {
         if (!$card || !$card['faceUp']) {
-            return '/images/playingCards_back.svg';
+            return \App\Services\AssetManager::getCardBackAsset('blue', 1);
         }
         
-        $filename = SolitaireEngine::getCardSprite($card);
-        return "/images/Cards/{$filename}";
+        return \App\Services\AssetManager::getCardAsset($card['suit'], $card['rank']);
     }
 
     public function getStats()

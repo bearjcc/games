@@ -72,8 +72,8 @@ new class extends Component
     {
         if (!$card) return '';
         
-        $filename = WarEngine::getCardSprite($card);
-        return "background-image: url('/images/Cards/{$filename}'); background-size: cover; background-position: center;";
+        $cardUrl = \App\Services\AssetManager::getCardAsset($card['suit'], $card['rank']);
+        return "background-image: url('{$cardUrl}'); background-size: cover; background-position: center;";
     }
 
     public function getStats()

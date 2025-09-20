@@ -32,22 +32,74 @@ All games implement `App\Games\Contracts\GameInterface`:
 - **State Management**: Game state in Livewire component properties
 - **Real-time Updates**: Automatic re-rendering on state changes
 
+### Asset Management System
+- **AssetManager Service**: Centralized asset loading with validation and caching
+- **Blade Components**: Reusable asset components (`<x-assets.piece>`, `<x-assets.dice>`, etc.)
+- **Asset Catalog**: Comprehensive documentation of all 470 game assets
+- **Consistent Loading**: All assets use `@images/` alias for proper Bootstrap bundling
+- **Performance**: Automatic caching and lazy loading support
+
+## Asset Usage Patterns
+
+### AssetManager Service
+```php
+use App\Services\AssetManager;
+
+// Game pieces
+$pieceUrl = AssetManager::getPieceAsset('Red', 'border', 5);
+
+// Dice
+$diceUrl = AssetManager::getDiceAsset('red', 'border', 3);
+
+// Poker chips
+$chipUrl = AssetManager::getChipAsset('BlueWhite', 'border');
+
+// Playing cards
+$cardUrl = AssetManager::getCardAsset('hearts', 'A');
+$cardBackUrl = AssetManager::getCardBackAsset('blue', 1);
+```
+
+### Blade Components
+```blade
+{{-- Game pieces --}}
+<x-assets.piece color="Red" style="border" :index="5" class="game-piece" />
+
+{{-- Dice --}}
+<x-assets.dice color="red" style="border" :value="3" class="dice" />
+
+{{-- Poker chips --}}
+<x-assets.chip color="BlueWhite" style="border" class="chip" />
+
+{{-- Playing cards --}}
+<x-assets.playing-card suit="hearts" rank="A" class="card" />
+<x-assets.card-back color="blue" :style="1" class="card-back" />
+```
+
+### Game Integration
+- All games use AssetManager for consistent asset loading
+- Validation prevents runtime errors with invalid parameters
+- Automatic caching improves performance
+- Fallback handling for missing assets
+
 ## Testing Strategy
 
 ### Unit Tests
 - Game logic in `Tests\Unit\Games\{GameName}\`
 - Service classes in `Tests\Unit\Services\`
+- Asset management in `Tests\Unit\Services\AssetManagerTest`
 - Focus on pure game logic, edge cases
 
 ### Feature Tests  
 - Full game workflows in `Tests\Feature\Games\`
 - UI interactions, score tracking
 - Authentication integration
+- Asset loading and rendering
 
 ### Testing Utilities
 - `GameTestCase`: Base class for game tests
 - Factory methods for common game states
 - Assertion helpers for game-specific outcomes
+- Asset validation helpers
 
 ## Asset Management
 - SVG game pieces in `resources/img/`

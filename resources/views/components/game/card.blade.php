@@ -31,10 +31,10 @@
     
     $cardImageUrl = null;
     if ($card && $faceUp) {
-        // Generate card image URL - this should match your existing logic
-        $cardImageUrl = "/images/Cards/card{$card['suit']}{$card['rank']}.png";
+        // Use AssetManager for consistent asset loading
+        $cardImageUrl = \App\Services\AssetManager::getCardAsset($card['suit'], $card['rank']);
     } else {
-        $cardImageUrl = "/images/playingCards_back.svg";
+        $cardImageUrl = \App\Services\AssetManager::getCardBackAsset('blue', 1);
     }
 @endphp
 

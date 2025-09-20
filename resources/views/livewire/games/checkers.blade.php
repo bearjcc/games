@@ -205,10 +205,10 @@ new class extends Component
         if (!$piece) return null;
         
         return match($piece) {
-            CheckersEngine::RED => '/images/Pieces%20(Red)/pieceRed_single00.png',
-            CheckersEngine::BLACK => '/images/Pieces%20(Black)/pieceBlack_single00.png',
-            CheckersEngine::RED_KING => '/images/Pieces%20(Red)/pieceRed_multi00.png',
-            CheckersEngine::BLACK_KING => '/images/Pieces%20(Black)/pieceBlack_multi00.png',
+            CheckersEngine::RED => \App\Services\AssetManager::getPieceAsset('Red', 'single', 0),
+            CheckersEngine::BLACK => \App\Services\AssetManager::getPieceAsset('Black', 'single', 0),
+            CheckersEngine::RED_KING => \App\Services\AssetManager::getPieceAsset('Red', 'multi', 0),
+            CheckersEngine::BLACK_KING => \App\Services\AssetManager::getPieceAsset('Black', 'multi', 0),
             default => null
         };
     }
