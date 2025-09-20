@@ -240,13 +240,14 @@ new class extends Component
         height: 126px;
         background-image: url('/images/playingCards.svg');
         background-size: 1170px 504px;
+        background-repeat: no-repeat;
         border-radius: 8px;
         border: 1px solid rgba(255,255,255,0.1);
         box-shadow: 
             0 8px 24px rgba(0,0,0,0.4),
             0 4px 12px rgba(0,0,0,0.2),
             inset 0 1px 0 rgba(255,255,255,0.1);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Removed transition to prevent background-position wandering */
         position: relative;
     }
 
@@ -303,9 +304,23 @@ new class extends Component
         cursor: pointer;
         transition: transform 0.2s ease;
     }
+    
+    /* Battle cards should have static background positioning */
+    .battle-card {
+        animation: cardFlip 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: perspective(800px) rotateY(0deg);
+        /* Ensure background-position stays locked during animations */
+        background-attachment: scroll;
+    }
 
     .deck-stack.interactive:hover:not(.disabled) {
         transform: translateY(-8px) scale(1.05);
+    }
+    
+    /* Ensure no background-position transitions anywhere */
+    .playing-card, .battle-card, .deck-card {
+        transition: transform 0.2s ease, box-shadow 0.3s ease;
+        /* Explicitly exclude background-position from transitions */
     }
 
     .deck-stack.disabled {
@@ -353,10 +368,6 @@ new class extends Component
         justify-content: center;
     }
 
-    .battle-card {
-        animation: cardFlip 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        transform: perspective(800px) rotateY(0deg);
-    }
 
     .placeholder-card {
         width: 90px;

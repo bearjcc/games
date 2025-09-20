@@ -159,10 +159,10 @@ class WarEngine
         $suitIndex = array_search($card['suit'], $suitOrder);
         $rankIndex = array_search($card['rank'], $rankOrder);
         
-        // Playing cards sprite is typically 13 cards wide, 4 suits tall
+        // Sprite sheet is 1170px wide (13 cards × 90px) and 504px tall (4 suits × 126px)
         return [
-            'x' => $rankIndex * -72, // Assuming 72px card width
-            'y' => $suitIndex * -96   // Assuming 96px card height
+            'x' => $rankIndex * -90, // 90px card width to match CSS background-size
+            'y' => $suitIndex * -126  // 126px card height to match CSS background-size  
         ];
     }
 
