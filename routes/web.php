@@ -26,5 +26,6 @@ Volt::route('games/{slug}', 'games.show')->name('games.show');
 Volt::route('tic-tac-toe', 'games.tic-tac-toe')->name('t3');
 Volt::route('2048', 'games.2048')->name('twozero');
 Volt::route('war', 'games.war')->name('war');
+Volt::route('solitaire', 'games.solitaire')->name('solitaire');
 
 require __DIR__.'/auth.php';

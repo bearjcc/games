@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(new TicTacToeGame());
             $registry->register(new TwentyFortyEightGame());
             $registry->register(new \App\Games\War\WarGame());
+            $registry->register(new \App\Games\Solitaire\SolitaireGame());
             return $registry;
         });
     }
