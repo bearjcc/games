@@ -4,8 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Games\GameRegistry;
 
-// Homepage -> Games index
-Volt::route('/', 'games.index')->name('home');
+// Homepage -> New impressive homepage
+Volt::route('/', 'games.homepage')->name('home');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
