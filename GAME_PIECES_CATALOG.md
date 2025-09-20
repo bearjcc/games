@@ -174,6 +174,122 @@ Each color includes 2 different styling variants:
 - **5 pips:** Center pip + four corner pips
 - **6 pips:** 2x3 grid arrangement (two columns of three)
 
+## Poker Chip Assets Catalog
+
+### Asset Structure
+The project includes poker chip assets in 8 different color combinations:
+- **BlackWhite** (`Chips/chipBlackWhite*.png`)
+- **Blue** (`Chips/chipBlue*.png`)
+- **BlueWhite** (`Chips/chipBlueWhite*.png`)
+- **Green** (`Chips/chipGreen*.png`)
+- **GreenWhite** (`Chips/chipGreenWhite*.png`)
+- **RedWhite** (`Chips/chipRedWhite*.png`)
+- **White** (`Chips/chipWhite*.png`)
+- **WhiteBlue** (`Chips/chipWhiteBlue*.png`)
+
+### Style Variants
+Each color combination includes 4 different styling variants:
+- `chip{Color}.png` - Standard flat top-down view
+- `chip{Color}_border.png` - With enhanced border/outline
+- `chip{Color}_side.png` - Side/edge view showing thickness
+- `chip{Color}_sideBorder.png` - Side view with enhanced border
+
+### Total Chip Assets
+**8 color combinations × 4 styles = 32 individual chip images**
+
+### Chip Identification Catalog
+
+#### BlackWhite Chips (`chipBlackWhite*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| Standard | `chipBlackWhite.png` | Black and white chip, flat view | `chip`, `black`, `white`, `casino` |
+| Border | `chipBlackWhite_border.png` | Black and white chip with enhanced border | `chip`, `black`, `white`, `border`, `casino` |
+| Side | `chipBlackWhite_side.png` | Black and white chip, side view showing thickness | `chip`, `black`, `white`, `side`, `casino` |
+| Side Border | `chipBlackWhite_sideBorder.png` | Black and white chip, side view with border | `chip`, `black`, `white`, `side`, `border`, `casino` |
+
+#### Blue Chips (`chipBlue*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| Standard | `chipBlue.png` | Solid blue chip, flat view | `chip`, `blue`, `solid`, `casino` |
+| Border | `chipBlue_border.png` | Solid blue chip with enhanced border | `chip`, `blue`, `solid`, `border`, `casino` |
+| Side | `chipBlue_side.png` | Solid blue chip, side view showing thickness | `chip`, `blue`, `solid`, `side`, `casino` |
+| Side Border | `chipBlue_sideBorder.png` | Solid blue chip, side view with border | `chip`, `blue`, `solid`, `side`, `border`, `casino` |
+
+#### BlueWhite Chips (`chipBlueWhite*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| Standard | `chipBlueWhite.png` | Blue and white chip, flat view | `chip`, `blue`, `white`, `casino` |
+| Border | `chipBlueWhite_border.png` | Blue and white chip with enhanced border | `chip`, `blue`, `white`, `border`, `casino` |
+| Side | `chipBlueWhite_side.png` | Blue and white chip, side view showing thickness | `chip`, `blue`, `white`, `side`, `casino` |
+| Side Border | `chipBlueWhite_sideBorder.png` | Blue and white chip, side view with border | `chip`, `blue`, `white`, `side`, `border`, `casino` |
+
+#### Green Chips (`chipGreen*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| Standard | `chipGreen.png` | Solid green chip, flat view | `chip`, `green`, `solid`, `casino` |
+| Border | `chipGreen_border.png` | Solid green chip with enhanced border | `chip`, `green`, `solid`, `border`, `casino` |
+| Side | `chipGreen_side.png` | Solid green chip, side view showing thickness | `chip`, `green`, `solid`, `side`, `casino` |
+| Side Border | `chipGreen_sideBorder.png` | Solid green chip, side view with border | `chip`, `green`, `solid`, `side`, `border`, `casino` |
+
+#### GreenWhite Chips (`chipGreenWhite*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| Standard | `chipGreenWhite.png` | Green and white chip, flat view | `chip`, `green`, `white`, `casino` |
+| Border | `chipGreenWhite_border.png` | Green and white chip with enhanced border | `chip`, `green`, `white`, `border`, `casino` |
+| Side | `chipGreenWhite_side.png` | Green and white chip, side view showing thickness | `chip`, `green`, `white`, `side`, `casino` |
+| Side Border | `chipGreenWhite_sideBorder.png` | Green and white chip, side view with border | `chip`, `green`, `white`, `side`, `border`, `casino` |
+
+#### RedWhite Chips (`chipRedWhite*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| Standard | `chipRedWhite.png` | Red and white chip, flat view | `chip`, `red`, `white`, `casino` |
+| Border | `chipRedWhite_border.png` | Red and white chip with enhanced border | `chip`, `red`, `white`, `border`, `casino` |
+| Side | `chipRedWhite_side.png` | Red and white chip, side view showing thickness | `chip`, `red`, `white`, `side`, `casino` |
+| Side Border | `chipRedWhite_sideBorder.png` | Red and white chip, side view with border | `chip`, `red`, `white`, `side`, `border`, `casino` |
+
+#### White Chips (`chipWhite*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| Standard | `chipWhite.png` | Solid white chip, flat view | `chip`, `white`, `solid`, `casino` |
+| Border | `chipWhite_border.png` | Solid white chip with enhanced border | `chip`, `white`, `solid`, `border`, `casino` |
+| Side | `chipWhite_side.png` | Solid white chip, side view showing thickness | `chip`, `white`, `solid`, `side`, `casino` |
+| Side Border | `chipWhite_sideBorder.png` | Solid white chip, side view with border | `chip`, `white`, `solid`, `side`, `border`, `casino` |
+
+#### WhiteBlue Chips (`chipWhiteBlue*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| Standard | `chipWhiteBlue.png` | White and blue chip, flat view | `chip`, `white`, `blue`, `casino` |
+| Border | `chipWhiteBlue_border.png` | White and blue chip with enhanced border | `chip`, `white`, `blue`, `border`, `casino` |
+| Side | `chipWhiteBlue_side.png` | White and blue chip, side view showing thickness | `chip`, `white`, `blue`, `side`, `casino` |
+| Side Border | `chipWhiteBlue_sideBorder.png` | White and blue chip, side view with border | `chip`, `white`, `blue`, `side`, `border`, `casino` |
+
+### Chip Design Patterns
+
+#### Two-Color Chips (BlackWhite, BlueWhite, GreenWhite, RedWhite, WhiteBlue)
+- Central area in primary color
+- Outer ring with alternating segments of both colors
+- Creates classic casino-style poker chip appearance
+- Segmented border pattern around circumference
+
+#### Solid Color Chips (Blue, Green, White)
+- Uniform color throughout
+- May have subtle inner circle or recessed center
+- Clean, minimalist design
+
+#### Style Variations
+- **Standard**: Flat top-down view
+- **Border**: Enhanced outline/border for better visibility
+- **Side**: Shows chip thickness from edge perspective
+- **Side Border**: Side view with enhanced border
+
 ## Categories Summary
 
 ### Border Style Pieces
@@ -197,6 +313,12 @@ Each color includes 2 different styling variants:
 - **White Dice (12 pieces)**: Complete set of 1-6 pip dice in border and no-border styles
 - **Standard Arrangements**: All dice follow traditional pip arrangements for values 1-6
 
+### Poker Chip Assets
+- **Two-Color Chips (20 pieces)**: BlackWhite, BlueWhite, GreenWhite, RedWhite, WhiteBlue combinations
+- **Solid Color Chips (12 pieces)**: Blue, Green, White solid color chips
+- **Style Variants**: Standard, Border, Side, Side Border views for each color combination
+- **Casino Style**: Classic poker chip designs with segmented borders
+
 ## Usage Guidelines
 
 ### File Naming Convention
@@ -216,6 +338,14 @@ Examples:
 - `dieRed_border3.png` - Red die with border showing 3 pips
 - `dieWhite5.png` - White die without border showing 5 pips
 - `dieRed6.png` - Red die without border showing 6 pips
+
+#### Poker Chip Assets
+Chips follow the pattern: `chip{Color}[Color2][_Style].png`
+
+Examples:
+- `chipRedWhite_border.png` - Red and white chip with border
+- `chipBlue_side.png` - Solid blue chip, side view
+- `chipGreenWhite_sideBorder.png` - Green and white chip, side view with border
 
 ### Asset Loading
 Use the `@images/` alias for proper Bootstrap bundling:
@@ -238,6 +368,15 @@ $this->pieceImage = '@images/Pieces (Black)/pieceBlack_border05.png';
 $this->dieImage = '@images/Dice/dieWhite5.png';
 ```
 
+#### Poker Chip Assets
+```php
+// In Blade templates
+<img src="@images('Chips/chipRedWhite_border.png')" alt="Red White Chip">
+
+// In Livewire components
+$this->chipImage = '@images/Chips/chipBlue_side.png';
+```
+
 ### Game Integration
 
 #### Game Pieces
@@ -253,6 +392,13 @@ Dice are essential for many game types:
 - **Board games**: Monopoly, Risk, Settlers of Catan
 - **RPG elements**: Character creation, random events
 - **Educational games**: Math games, probability lessons
+
+#### Poker Chip Assets
+Chips are perfect for casino and betting games:
+- **Poker games**: Texas Hold'em, Omaha, Seven Card Stud
+- **Casino games**: Blackjack, Roulette, Craps
+- **Board games**: Monopoly, Risk, betting mechanics
+- **Educational games**: Money management, probability
 
 ## Maintenance Notes
 
@@ -274,6 +420,8 @@ Dice are essential for many game types:
 
 5. **Dice Assets**: Complete set of 24 dice images covering all standard values (1-6) in two colors (red, white) and two styles (with/without borders).
 
+6. **Poker Chip Assets**: Complete set of 32 chip images covering 8 color combinations in 4 style variants (standard, border, side, side border).
+
 ## Last Updated
 Generated on: $(date)
 Total assets cataloged: 
@@ -284,3 +432,7 @@ Total assets cataloged:
 - **Dice Assets**: 24 total (2 colors × 2 styles × 6 values)
   - Red dice: 12 pieces (complete set 1-6 in both styles)
   - White dice: 12 pieces (complete set 1-6 in both styles)
+- **Poker Chip Assets**: 32 total (8 color combinations × 4 styles)
+  - Two-color chips: 20 pieces (BlackWhite, BlueWhite, GreenWhite, RedWhite, WhiteBlue)
+  - Solid color chips: 12 pieces (Blue, Green, White)
+- **Grand Total**: **455 individual game assets**
