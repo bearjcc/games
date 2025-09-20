@@ -48,6 +48,10 @@ class HintEngine
                 $hints = self::getCheckersHints($state, $options);
                 break;
                 
+            case 'chess':
+                $hints = self::getChessHints($state, $options);
+                break;
+                
             default:
                 $hints = self::getGenericHints($game, $state, $options);
                 break;
@@ -1180,6 +1184,157 @@ class HintEngine
     {
         [$row, $col] = $square;
         $colLetter = chr(ord('A') + $col);
+        $rowNumber = 8 - $row;
+        return $colLetter . $rowNumber;
+    }
+    
+    /**
+     * Get hints for Chess
+     */
+    private static function getChessHints(array $state, array $options): array
+    {
+        $hints = [];
+        $currentPlayer = $state['currentPlayer'];
+        
+        // Critical hint for check situation
+        if ($state['check']) {
+            $hints[] = [
+                'type' => 'critical',
+                'priority' => 10,
+                'action' => 'escape_check',
+                'description' => 'Your king is in check! You must move out of check.',
+                'reasoning' => 'Being in check requires immediate attention - move king, block, or capture attacking piece'
+            ];
+        }
+        
+        // Look for checkmate threats and tactical opportunities
+        $validMoves = self::getChessValidMoves($state);
+        
+        // Check for immediate tactical threats (captures, checks)
+        foreach ($validMoves as $move) {
+            if (isset($move['captured'])) {
+                $capturedValue = self::getChessPieceValue($move['captured']);
+                if ($capturedValue >= 5) { // Rook or Queen
+                    $fromNotation = self::getChessSquareNotation($move['from']);
+                    $toNotation = self::getChessSquareNotation($move['to']);
+                    
+                    $hints[] = [
+                        'type' => 'critical',
+                        'priority' => 9,
+                        'action' => 'major_capture',
+                        'description' => "Capture opportunity: {$fromNotation} to {$toNotation}",
+                        'reasoning' => "Capturing {$move['captured']} gains significant material advantage"
+                    ];
+                }
+            }
+        }
+        
+        // Check for castling opportunities
+        if (self::canCastleChess($state, $currentPlayer)) {
+            $hints[] = [
+                'type' => 'strategic',
+                'priority' => 7,
+                'action' => 'castle',
+                'description' => 'Consider castling to improve king safety',
+                'reasoning' => 'Castling gets your king to safety and activates your rook'
+            ];
+        }
+        
+        // Check for pawn promotion opportunities
+        if (self::hasPromotionOpportunity($state, $currentPlayer)) {
+            $hints[] = [
+                'type' => 'strategic',
+                'priority' => 8,
+                'action' => 'promotion',
+                'description' => 'Push your pawn for promotion',
+                'reasoning' => 'Promoting a pawn to a queen gives a huge material advantage'
+            ];
+        }
+        
+        // Development hints for opening
+        if ($state['moves'] < 10) {
+            $hints[] = [
+                'type' => 'strategic',
+                'priority' => 6,
+                'action' => 'development',
+                'description' => 'Develop your pieces (knights and bishops first)',
+                'reasoning' => 'Good development leads to better piece coordination and attacking chances'
+            ];
+        }
+        
+        // Center control hints
+        $hints[] = [
+            'type' => 'strategic',
+            'priority' => 5,
+            'action' => 'center_control',
+            'description' => 'Control the center squares (e4, e5, d4, d5)',
+            'reasoning' => 'Central control gives your pieces better mobility and attacking options'
+        ];
+        
+        return $hints;
+    }
+    
+    /**
+     * Get valid moves for Chess (simplified for hints)
+     */
+    private static function getChessValidMoves(array $state): array
+    {
+        // This would integrate with ChessEngine::getValidMoves()
+        // For now, return empty array to prevent errors
+        return [];
+    }
+    
+    /**
+     * Get chess piece value
+     */
+    private static function getChessPieceValue(string $piece): int
+    {
+        return match (true) {
+            str_contains($piece, 'pawn') => 1,
+            str_contains($piece, 'knight') => 3,
+            str_contains($piece, 'bishop') => 3,
+            str_contains($piece, 'rook') => 5,
+            str_contains($piece, 'queen') => 9,
+            str_contains($piece, 'king') => 100,
+            default => 0,
+        };
+    }
+    
+    /**
+     * Check if player can castle
+     */
+    private static function canCastleChess(array $state, string $player): bool
+    {
+        $prefix = $player === 'white' ? 'white' : 'black';
+        return $state['castlingRights'][$prefix . '_kingside'] || 
+               $state['castlingRights'][$prefix . '_queenside'];
+    }
+    
+    /**
+     * Check if player has pawn promotion opportunity
+     */
+    private static function hasPromotionOpportunity(array $state, string $player): bool
+    {
+        $board = $state['board'];
+        $pawnPiece = $player === 'white' ? 'white_pawn' : 'black_pawn';
+        $promotionRank = $player === 'white' ? 1 : 6;
+        
+        for ($col = 0; $col < 8; $col++) {
+            if ($board[$promotionRank][$col] === $pawnPiece) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Convert chess square coordinates to notation (a1, b2, etc.)
+     */
+    private static function getChessSquareNotation(array $square): string
+    {
+        [$row, $col] = $square;
+        $colLetter = chr(ord('a') + $col);
         $rowNumber = 8 - $row;
         return $colLetter . $rowNumber;
     }

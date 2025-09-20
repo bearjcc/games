@@ -36,6 +36,11 @@ new class extends Component
     
     public function selectSquare($row, $col)
     {
+        // Skip if game is over
+        if ($this->state['gameOver']) {
+            return;
+        }
+        
         // Skip if AI is thinking
         if ($this->gameMode === 'vs_ai' && $this->state['currentPlayer'] === CheckersEngine::BLACK) {
             return;

@@ -372,6 +372,11 @@ class CheckersEngine
             return ['gameOver' => true, 'winner' => $opponent];
         }
 
+        // Check if opponent has no pieces (important for captures)
+        if (self::getPlayerPieceCount($state, $opponent) === 0) {
+            return ['gameOver' => true, 'winner' => $currentPlayer];
+        }
+
         // Check if current player has no valid moves
         $validMoves = self::getValidMoves($state);
         if (empty($validMoves)) {

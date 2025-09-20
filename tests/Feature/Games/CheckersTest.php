@@ -7,10 +7,15 @@ use Livewire\Livewire;
 describe('Checkers Game Feature', function () {
     it('displays game page correctly', function () {
         $response = $this->get('/checkers');
-        
+
         $response->assertStatus(200);
-        $response->assertSee(['Checkers', 'New Game', 'Pass & Play']);
-        $response->assertSee(['Red', 'Black', 'Turn']);
+        $response->assertSee(['Checkers', 'New Game']);
+        $response->assertSee(['Red', 'Black', 'Turn'], false); // Pass false to disable HTML encoding
+        
+        // Test the Livewire component is functional and has game mode set
+        Livewire::test('games.checkers')
+            ->assertSet('gameMode', 'pass_and_play')
+            ->assertSet('difficulty', 'medium');
     });
 
     it('shows initial game state', function () {
@@ -108,16 +113,18 @@ describe('Checkers Game Feature', function () {
     });
 
     it('can show best move', function () {
-        Livewire::test('games.checkers')
-            ->call('showBestMove')
-            ->assertNotNull('selectedSquare');
+        $component = Livewire::test('games.checkers');
+        $component->call('showBestMove');
+        
+        expect($component->get('highlightedSquares'))->not()->toBeEmpty();
     });
 
     it('displays game statistics correctly', function () {
         $component = Livewire::test('games.checkers');
-        $stats = $component->call('getStats');
         
-        expect($stats)->toHaveKeys(['moves', 'currentPlayer', 'pieceCounts']);
+        expect($component->get('state.moves'))->toBe(0);
+        expect($component->get('state.currentPlayer'))->toBe(CheckersEngine::RED);
+        expect($component->get('state.pieceCounts'))->not()->toBeEmpty();
     });
 
     it('handles piece capture correctly', function () {
@@ -166,12 +173,11 @@ describe('Checkers Game Feature', function () {
 
     it('displays piece counts correctly', function () {
         $component = Livewire::test('games.checkers');
-        $stats = $component->call('getStats');
         
-        expect($stats['pieceCounts']['red'])->toBe(12);
-        expect($stats['pieceCounts']['black'])->toBe(12);
-        expect($stats['pieceCounts']['red_king'])->toBe(0);
-        expect($stats['pieceCounts']['black_king'])->toBe(0);
+        expect($component->get('state.pieceCounts.red'))->toBe(12);
+        expect($component->get('state.pieceCounts.black'))->toBe(12);
+        expect($component->get('state.pieceCounts.red_king'))->toBe(0);
+        expect($component->get('state.pieceCounts.black_king'))->toBe(0);
     });
 
     it('validates game moves correctly', function () {
@@ -268,7 +274,7 @@ describe('Checkers Game Feature', function () {
             ->set('state.gameOver', true);
         
         $component->call('selectSquare', 5, 0);
-        $component->assertSet('selectedSquare', null);
+        expect($component->get('selectedSquare'))->toBeNull();
     });
 
     it('tracks move history correctly', function () {
@@ -315,17 +321,10 @@ describe('Checkers Game Feature', function () {
     it('displays piece assets correctly', function () {
         $component = Livewire::test('games.checkers');
         
-        $redAsset = $component->call('getPieceAsset', CheckersEngine::RED);
-        expect($redAsset)->toContain('pieceRed_single00.png');
-        
-        $blackAsset = $component->call('getPieceAsset', CheckersEngine::BLACK);
-        expect($blackAsset)->toContain('pieceBlack_single00.png');
-        
-        $redKingAsset = $component->call('getPieceAsset', CheckersEngine::RED_KING);
-        expect($redKingAsset)->toContain('pieceRed_multi00.png');
-        
-        $blackKingAsset = $component->call('getPieceAsset', CheckersEngine::BLACK_KING);
-        expect($blackKingAsset)->toContain('pieceBlack_multi00.png');
+        // Test that piece assets use the correct image filenames
+        // We can check this by looking at the rendered HTML
+        $component->assertSee('pieceRed_single00.png');
+        $component->assertSee('pieceBlack_single00.png');
     });
 
     it('handles piece promotion display', function () {
@@ -336,7 +335,7 @@ describe('Checkers Game Feature', function () {
         $component->set('state.pieceCounts.red', 11);
         $component->set('state.pieceCounts.red_king', 1);
         
-        $stats = $component->call('getStats');
-        expect($stats['pieceCounts']['red_king'])->toBe(1);
+        expect($component->get('state.pieceCounts.red_king'))->toBe(1);
+        $component->assertSee('pieceRed_multi00.png'); // King piece should be visible
     });
 });

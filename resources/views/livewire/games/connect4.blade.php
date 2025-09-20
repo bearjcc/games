@@ -179,29 +179,25 @@ new class extends Component
         @endif
     </x-game.accessibility>
 
+    <x-game.styles />
     <div class="connect4-game">
         <!-- Game Header -->
         <div class="game-header">
-            <h1 class="game-title">Connect 4</h1>
             <div class="game-status">
                 @if(!$state['gameOver'])
-                    <div class="current-player">
-                        <span class="player-indicator {{ $state['currentPlayer'] }}">
-                            <div class="player-piece {{ $state['currentPlayer'] }}"></div>
-                            {{ ucfirst($state['currentPlayer']) }}'s Turn
-                        </span>
+                    <div class="player-indicator">
+                        <div class="player-piece {{ $state['currentPlayer'] }}"></div>
+                        {{ ucfirst($state['currentPlayer']) }}'s Turn
                     </div>
                 @else
-                    <div class="game-result">
-                        @if($state['winner'] === 'draw')
-                            <span class="draw-indicator">🤝 Draw Game!</span>
-                        @else
-                            <span class="winner-indicator {{ $state['winner'] }}">
-                                <div class="player-piece {{ $state['winner'] }}"></div>
-                                {{ ucfirst($state['winner']) }} Wins! 🎉
-                            </span>
-                        @endif
-                    </div>
+                    @if($state['winner'] === 'draw')
+                        <div class="draw-indicator">Draw Game!</div>
+                    @else
+                        <div class="winner-indicator">
+                            <div class="player-piece {{ $state['winner'] }}"></div>
+                            {{ ucfirst($state['winner']) }} Wins!
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>
@@ -321,19 +317,19 @@ new class extends Component
 
         <!-- Game Controls -->
         <div class="game-controls">
-            <button wire:click="resetGame" class="game-btn new-game-btn">
+            <button wire:click="resetGame" class="game-button">
                 New Game
             </button>
             <button wire:click="undo" 
-                    class="game-btn undo-btn {{ $this->canUndo() ? '' : 'disabled' }}" 
+                    class="game-button {{ $this->canUndo() ? 'primary' : '' }}" 
                     {{ $this->canUndo() ? '' : 'disabled' }}>
-                ↶ Undo
+                Undo
             </button>
-            <button wire:click="showBestMove" class="game-btn hint-move-btn">
-                🎯 Best Move
+            <button wire:click="showBestMove" class="game-button">
+                Best Move
             </button>
-            <button wire:click="toggleHints" class="game-btn hint-btn {{ $showHints ? 'active' : '' }}">
-                💡 Hints
+            <button wire:click="toggleHints" class="game-button {{ $showHints ? 'primary' : '' }}">
+                Hints
             </button>
         </div>
 
@@ -369,12 +365,9 @@ new class extends Component
     </div>
 
     <style>
+        /* Connect4-specific styles that complement the liminal base styles */
         .connect4-game {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #1e1b4b 100%);
-            padding: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: white;
+            background: transparent;
         }
 
         .game-header {

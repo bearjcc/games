@@ -7,6 +7,7 @@ use App\Games\GameRegistry;
 use App\Games\Samples\SampleGame;
 use App\Games\TicTacToe\TicTacToeGame;
 use App\Games\TwentyFortyEight\TwentyFortyEightGame;
+use App\Games\Chess\ChessGame;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(new \App\Games\PegSolitaire\PegSolitaireGame());
             $registry->register(new \App\Games\Connect4\Connect4Game());
             $registry->register(new \App\Games\Checkers\CheckersGame());
+            $registry->register(new ChessGame());
             return $registry;
         });
     }
