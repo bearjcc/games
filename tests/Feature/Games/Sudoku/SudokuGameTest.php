@@ -201,7 +201,7 @@ describe('Sudoku Game Feature', function () {
     it('generates puzzles with different difficulties', function () {
         $game = new SudokuGame();
         
-        foreach (['easy', 'medium', 'hard', 'expert'] as $difficulty) {
+        foreach (['beginner', 'easy', 'medium', 'hard', 'expert'] as $difficulty) {
             $puzzle = $game->generatePuzzle($difficulty);
             
             expect($puzzle)->toHaveKey('puzzle');
@@ -389,6 +389,82 @@ describe('Sudoku Game Feature', function () {
             $state = $game->applyMove($state, ['action' => 'place_number', 'row' => $row, 'col' => $col, 'number' => 7]);
             expect($state['board'][$row][$col])->toBe(7);
             expect($state['notes'][$row][$col])->toBeEmpty(); // Notes should be cleared
+        }
+    });
+
+    it('auto-solves puzzles correctly', function () {
+        $game = new SudokuGame();
+        $state = $game->initialState();
+        
+        // Should be able to auto-solve initially
+        expect($game->canAutoSolve($state))->toBeTrue();
+        
+        $solvedState = $game->autoSolve($state);
+        
+        // Should be game complete
+        expect($game->isOver($solvedState))->toBeTrue();
+        
+        // Should not be able to auto-solve a completed puzzle
+        expect($game->canAutoSolve($solvedState))->toBeFalse();
+    });
+
+    it('solves puzzles step by step', function () {
+        $game = new SudokuGame();
+        $state = $game->initialState();
+        
+        // Take a step
+        $newState = $game->solveStep($state);
+        expect($newState)->not->toBeNull();
+        
+        // Should have one more filled cell
+        $originalFilled = 0;
+        $newFilled = 0;
+        
+        for ($row = 0; $row < 9; $row++) {
+            for ($col = 0; $col < 9; $col++) {
+                if ($state['board'][$row][$col] !== 0) $originalFilled++;
+                if ($newState['board'][$row][$col] !== 0) $newFilled++;
+            }
+        }
+        
+        expect($newFilled)->toBe($originalFilled + 1);
+    });
+
+    it('generates puzzle data for printing', function () {
+        $game = new SudokuGame();
+        $state = $game->initialState();
+        
+        $printData = $game->getPuzzleForPrinting($state);
+        
+        expect($printData)->toHaveKey('puzzle');
+        expect($printData)->toHaveKey('solution');
+        expect($printData)->toHaveKey('difficulty');
+        expect($printData)->toHaveKey('timestamp');
+        
+        expect($printData['puzzle'])->toBe($state['originalPuzzle']);
+        expect($printData['solution'])->toBe($state['solution']);
+        expect($printData['difficulty'])->toBe('medium');
+        expect($printData['timestamp'])->toBeString();
+    });
+
+    it('displays all difficulty levels on the page', function () {
+        $response = $this->get('/sudoku');
+        
+        $response->assertStatus(200);
+        $response->assertSee(['Beginner', 'Easy', 'Medium', 'Hard', 'Expert']);
+    });
+
+    it('handles auto-solve through game interface', function () {
+        $game = new SudokuGame();
+        $state = $game->initialState();
+        
+        // Simulate auto-solve
+        if ($game->canAutoSolve($state)) {
+            $solvedState = $game->autoSolve($state);
+            
+            // Should be complete and have a score
+            expect($game->isOver($solvedState))->toBeTrue();
+            expect($game->getScore($solvedState))->toBeGreaterThan(0);
         }
     });
 });

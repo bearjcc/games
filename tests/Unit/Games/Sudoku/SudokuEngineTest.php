@@ -372,6 +372,20 @@ describe('SudokuEngine', function () {
         }
     });
 
+    it('has correct difficulty levels', function () {
+        expect(SudokuEngine::DIFFICULTIES)->toHaveKeys(['beginner', 'easy', 'medium', 'hard', 'expert']);
+        
+        expect(SudokuEngine::DIFFICULTIES['beginner']['clues'])->toBe(45);
+        expect(SudokuEngine::DIFFICULTIES['easy']['clues'])->toBe(38);
+        expect(SudokuEngine::DIFFICULTIES['medium']['clues'])->toBe(30);
+        expect(SudokuEngine::DIFFICULTIES['hard']['clues'])->toBe(24);
+        expect(SudokuEngine::DIFFICULTIES['expert']['clues'])->toBe(18);
+        
+        expect(SudokuEngine::MAX_HINTS)->toHaveKeys(['beginner', 'easy', 'medium', 'hard', 'expert']);
+        expect(SudokuEngine::MAX_HINTS['beginner'])->toBe(6);
+        expect(SudokuEngine::MAX_HINTS['expert'])->toBe(1);
+    });
+
     it('solves puzzles correctly', function () {
         // Create a simple puzzle to solve
         $puzzle = array_fill(0, 9, array_fill(0, 9, 0));
@@ -468,5 +482,144 @@ describe('SudokuEngine', function () {
             'number' => 5
         ]);
         expect($moveState['gameStarted'])->toBeTrue();
+    });
+
+    it('auto-solves puzzles correctly', function () {
+        $state = SudokuEngine::newGame('easy');
+        
+        // Should be able to auto-solve initially
+        expect(SudokuEngine::canAutoSolve($state))->toBeTrue();
+        
+        $solvedState = SudokuEngine::autoSolve($state);
+        
+        // Check that all cells are filled
+        for ($row = 0; $row < 9; $row++) {
+            for ($col = 0; $col < 9; $col++) {
+                expect($solvedState['board'][$row][$col])->toBeGreaterThan(0);
+            }
+        }
+        
+        // Should be game complete
+        expect($solvedState['gameComplete'])->toBeTrue();
+        
+        // Should not be able to auto-solve a completed puzzle
+        expect(SudokuEngine::canAutoSolve($solvedState))->toBeFalse();
+    });
+
+    it('solves puzzles step by step', function () {
+        $state = SudokuEngine::newGame('easy');
+        
+        // Take a step
+        $newState = SudokuEngine::solveStep($state);
+        expect($newState)->not->toBeNull();
+        
+        // Should have one more filled cell
+        $originalFilled = 0;
+        $newFilled = 0;
+        
+        for ($row = 0; $row < 9; $row++) {
+            for ($col = 0; $col < 9; $col++) {
+                if ($state['board'][$row][$col] !== 0) $originalFilled++;
+                if ($newState['board'][$row][$col] !== 0) $newFilled++;
+            }
+        }
+        
+        expect($newFilled)->toBe($originalFilled + 1);
+        
+        // Should have started the game
+        expect($newState['gameStarted'])->toBeTrue();
+    });
+
+    it('generates puzzle data for printing', function () {
+        $state = SudokuEngine::newGame('medium');
+        
+        $printData = SudokuEngine::getPuzzleForPrinting($state);
+        
+        expect($printData)->toHaveKey('puzzle');
+        expect($printData)->toHaveKey('solution');
+        expect($printData)->toHaveKey('difficulty');
+        expect($printData)->toHaveKey('timestamp');
+        
+        expect($printData['puzzle'])->toBe($state['originalPuzzle']);
+        expect($printData['solution'])->toBe($state['solution']);
+        expect($printData['difficulty'])->toBe('medium');
+        expect($printData['timestamp'])->toBeString();
+    });
+
+    it('validates board generation quality', function () {
+        // Test multiple puzzle generations to ensure consistency
+        for ($i = 0; $i < 5; $i++) {
+            foreach (SudokuEngine::DIFFICULTIES as $difficulty => $info) {
+                $puzzle = SudokuEngine::generatePuzzle($difficulty);
+                
+                // Verify puzzle structure
+                expect($puzzle['puzzle'])->toHaveCount(9);
+                expect($puzzle['solution'])->toHaveCount(9);
+                
+                // Verify solution is valid
+                $solution = $puzzle['solution'];
+                
+                // Check each row has all numbers 1-9
+                for ($row = 0; $row < 9; $row++) {
+                    $rowNumbers = array_values($solution[$row]);
+                    sort($rowNumbers);
+                    expect($rowNumbers)->toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                }
+                
+                // Check each column has all numbers 1-9
+                for ($col = 0; $col < 9; $col++) {
+                    $colNumbers = [];
+                    for ($row = 0; $row < 9; $row++) {
+                        $colNumbers[] = $solution[$row][$col];
+                    }
+                    sort($colNumbers);
+                    expect($colNumbers)->toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                }
+                
+                // Check each 3x3 box has all numbers 1-9
+                for ($boxRow = 0; $boxRow < 3; $boxRow++) {
+                    for ($boxCol = 0; $boxCol < 3; $boxCol++) {
+                        $boxNumbers = [];
+                        for ($row = $boxRow * 3; $row < ($boxRow + 1) * 3; $row++) {
+                            for ($col = $boxCol * 3; $col < ($boxCol + 1) * 3; $col++) {
+                                $boxNumbers[] = $solution[$row][$col];
+                            }
+                        }
+                        sort($boxNumbers);
+                        expect($boxNumbers)->toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                    }
+                }
+                
+                // Verify puzzle is solvable (can be solved by the solver)
+                $testPuzzle = $puzzle['puzzle'];
+                $canSolve = SudokuEngine::solvePuzzle($testPuzzle);
+                expect($canSolve)->toBeTrue();
+            }
+        }
+    });
+
+    it('handles edge cases in puzzle generation', function () {
+        // Test with invalid difficulty (should fall back to medium)
+        $puzzle = SudokuEngine::generatePuzzle('invalid');
+        expect($puzzle)->toHaveKey('puzzle');
+        expect($puzzle)->toHaveKey('solution');
+        
+        // Test that puzzles are unique (very unlikely to be identical)
+        $puzzle1 = SudokuEngine::generatePuzzle('medium');
+        $puzzle2 = SudokuEngine::generatePuzzle('medium');
+        
+        // They should be different (though theoretically possible to be the same)
+        $identical = true;
+        for ($row = 0; $row < 9; $row++) {
+            for ($col = 0; $col < 9; $col++) {
+                if ($puzzle1['puzzle'][$row][$col] !== $puzzle2['puzzle'][$row][$col]) {
+                    $identical = false;
+                    break 2;
+                }
+            }
+        }
+        
+        // While theoretically possible, it's extremely unlikely
+        expect($identical)->toBeFalse();
     });
 });

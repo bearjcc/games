@@ -77,6 +77,55 @@ new class extends Component
         $this->applyMove($move);
     }
 
+    public function autoSolve()
+    {
+        $game = new SudokuGame();
+        if ($game->canAutoSolve($this->state)) {
+            $this->state = $game->autoSolve($this->state);
+            
+            // Update best score if user is authenticated
+            if (auth()->check()) {
+                $score = $game->getScore($this->state);
+                app(UserBestScoreService::class)->updateIfBetter(
+                    auth()->user(),
+                    'sudoku',
+                    $score
+                );
+            }
+        }
+    }
+
+    public function solveStep()
+    {
+        $game = new SudokuGame();
+        $newState = $game->solveStep($this->state);
+        if ($newState) {
+            $this->state = $newState;
+            
+            // Update best score if game is complete and user is authenticated
+            if ($this->state['gameComplete'] && auth()->check()) {
+                $score = $game->getScore($this->state);
+                app(UserBestScoreService::class)->updateIfBetter(
+                    auth()->user(),
+                    'sudoku',
+                    $score
+                );
+            }
+        }
+    }
+
+    public function printPuzzle()
+    {
+        $game = new SudokuGame();
+        $puzzleData = $game->getPuzzleForPrinting($this->state);
+        
+        // Store puzzle data in session for printing
+        session(['print_puzzle' => $puzzleData]);
+        
+        // Redirect to print page
+        return redirect()->route('games.print', ['game' => 'sudoku']);
+    }
+
     public function applyMove($move)
     {
         $game = new SudokuGame();
@@ -336,6 +385,32 @@ x-on:keydown.window="
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"/>
                             </svg>
                             Hint ({{ $state['maxHints'] - $state['hintsUsed'] }})
+                        </button>
+
+                        <button class="action-button solve-step-button" 
+                                wire:click="solveStep"
+                                {{ $state['gameComplete'] ? 'disabled' : '' }}>
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z"/>
+                            </svg>
+                            Solve Step
+                        </button>
+
+                        <button class="action-button auto-solve-button" 
+                                wire:click="autoSolve"
+                                {{ $state['gameComplete'] ? 'disabled' : '' }}>
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+                            </svg>
+                            Auto Solve
+                        </button>
+
+                        <button class="action-button print-button" 
+                                wire:click="printPuzzle">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"/>
+                            </svg>
+                            Print Puzzle
                         </button>
                     </div>
 
@@ -662,6 +737,24 @@ x-on:keydown.window="
             background: rgb(34 197 94);
             color: white;
             border-color: rgb(34 197 94);
+        }
+
+        .solve-step-button:not(:disabled) {
+            background: rgb(168 85 247);
+            color: white;
+            border-color: rgb(168 85 247);
+        }
+
+        .auto-solve-button:not(:disabled) {
+            background: rgb(239 68 68);
+            color: white;
+            border-color: rgb(239 68 68);
+        }
+
+        .print-button:not(:disabled) {
+            background: rgb(107 114 128);
+            color: white;
+            border-color: rgb(107 114 128);
         }
 
         .difficulty-buttons {

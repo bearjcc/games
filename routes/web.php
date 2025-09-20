@@ -47,4 +47,18 @@ Volt::route('farkle', 'games.farkle')->name('farkle');
 Volt::route('mastermind', 'games.mastermind')->name('mastermind');
 Volt::route('phase10', 'games.phase10')->name('phase10');
 
+// Print routes
+Route::get('games/{game}/print', function ($game) {
+    $puzzleData = session('print_puzzle');
+    
+    if (!$puzzleData) {
+        abort(404);
+    }
+    
+    return view('games.print', [
+        'game' => $game,
+        'puzzleData' => $puzzleData
+    ]);
+})->name('games.print');
+
 require __DIR__.'/auth.php';

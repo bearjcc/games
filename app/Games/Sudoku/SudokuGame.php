@@ -141,4 +141,24 @@ class SudokuGame implements GameInterface
     {
         return SudokuEngine::loadCustomPuzzle($puzzle);
     }
+
+    public function autoSolve(array $state): array
+    {
+        return SudokuEngine::autoSolve($state);
+    }
+
+    public function solveStep(array $state): ?array
+    {
+        return SudokuEngine::solveStep($state);
+    }
+
+    public function canAutoSolve(array $state): bool
+    {
+        return SudokuEngine::canAutoSolve($state);
+    }
+
+    public function getPuzzleForPrinting(array $state): array
+    {
+        return SudokuEngine::getPuzzleForPrinting($state);
+    }
 }

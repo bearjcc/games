@@ -8,13 +8,15 @@ namespace App\Games\Sudoku;
 class SudokuEngine
 {
     public const DIFFICULTIES = [
-        'easy' => ['clues' => 40, 'label' => 'Easy'],
-        'medium' => ['clues' => 32, 'label' => 'Medium'], 
-        'hard' => ['clues' => 26, 'label' => 'Hard'],
-        'expert' => ['clues' => 22, 'label' => 'Expert']
+        'beginner' => ['clues' => 45, 'label' => 'Beginner'],
+        'easy' => ['clues' => 38, 'label' => 'Easy'],
+        'medium' => ['clues' => 30, 'label' => 'Medium'], 
+        'hard' => ['clues' => 24, 'label' => 'Hard'],
+        'expert' => ['clues' => 18, 'label' => 'Expert']
     ];
 
     public const MAX_HINTS = [
+        'beginner' => 6,
         'easy' => 5,
         'medium' => 3,
         'hard' => 2,
@@ -350,6 +352,7 @@ class SudokuEngine
         
         $baseScore = 1000;
         $difficultyMultiplier = [
+            'beginner' => 0.5,
             'easy' => 1.0,
             'medium' => 1.5,
             'hard' => 2.0,
@@ -528,6 +531,70 @@ class SudokuEngine
             'conflicts' => [],
             'notesMode' => false,
             'gameStarted' => false
+        ];
+    }
+
+    public static function autoSolve(array $state): array
+    {
+        $solvedBoard = $state['solution'];
+        $newState = $state;
+        $newState['board'] = $solvedBoard;
+        $newState['notes'] = array_fill(0, 9, array_fill(0, 9, []));
+        $newState['conflicts'] = [];
+        $newState['gameComplete'] = true;
+        $newState['gameStarted'] = true;
+        
+        return $newState;
+    }
+
+    public static function solveStep(array $state): ?array
+    {
+        $board = $state['board'];
+        $solution = $state['solution'];
+        
+        // Find the next empty cell that can be filled
+        for ($row = 0; $row < 9; $row++) {
+            for ($col = 0; $col < 9; $col++) {
+                if ($board[$row][$col] === 0 && $state['originalPuzzle'][$row][$col] === 0) {
+                    // Fill this cell with the solution value
+                    $newState = $state;
+                    $newState['board'][$row][$col] = $solution[$row][$col];
+                    $newState['notes'][$row][$col] = [];
+                    $newState['conflicts'] = self::findConflicts($newState);
+                    $newState['gameStarted'] = true;
+                    
+                    // Check if game is now complete
+                    $newState['gameComplete'] = self::isGameComplete($newState);
+                    
+                    return $newState;
+                }
+            }
+        }
+        
+        return null; // No more steps available
+    }
+
+    public static function canAutoSolve(array $state): bool
+    {
+        // Check if there are any empty cells that can be filled
+        for ($row = 0; $row < 9; $row++) {
+            for ($col = 0; $col < 9; $col++) {
+                if ($state['board'][$row][$col] === 0 && $state['originalPuzzle'][$row][$col] === 0) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    public static function getPuzzleForPrinting(array $state): array
+    {
+        return [
+            'puzzle' => $state['originalPuzzle'],
+            'solution' => $state['solution'],
+            'difficulty' => $state['difficulty'],
+            'timestamp' => now()->format('Y-m-d H:i:s')
         ];
     }
 }
