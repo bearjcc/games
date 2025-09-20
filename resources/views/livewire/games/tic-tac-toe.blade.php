@@ -182,47 +182,65 @@ x-on:keydown.window="
     </div>
 
     <!-- Game Board -->
-    <div class="mx-auto mb-8" style="width: 350px;">
-        <div class="game-board bg-slate-100 dark:bg-slate-800 rounded-2xl p-4 shadow-lg">
-            <div class="grid grid-cols-3 gap-3">
-                @foreach ($board as $i => $cell)
-                    <button 
-                        wire:click="play({{ $i }})" 
-                        x-on:touchstart="onTouchStart($event, {{ $i }})"
-                        class="game-cell relative h-24 w-24 rounded-xl transition-all duration-200 transform
-                        @if(!$isGameActive || $cell !== null) cursor-default @else hover:scale-105 hover:shadow-md cursor-pointer @endif
-                        @if(in_array($i, $winningLine)) 
-                            bg-green-200 dark:bg-green-800 animate-pulse
-                        @elseif($lastMove === $i)
-                            bg-blue-200 dark:bg-blue-800
-                        @elseif($cell === null)
-                            bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600
-                        @else
-                            bg-gray-100 dark:bg-slate-600
-                        @endif
-                        border-2 
-                        @if(in_array($i, $winningLine))
-                            border-green-400 dark:border-green-600
-                        @else
-                            border-slate-200 dark:border-slate-600
-                        @endif
-                        flex items-center justify-center text-4xl font-bold
-                        @if($cell === 'X')
-                            text-blue-600 dark:text-blue-400
-                        @elseif($cell === 'O')
-                            text-red-500 dark:text-red-400
-                        @else
-                            text-gray-400
-                        @endif
-                        ">
-                        @if($cell)
-                            <span class="cell-content @if($lastMove === $i) animate-bounce @endif">{{ $cell }}</span>
-                        @else
-                            <span class="cell-number opacity-30 text-sm">{{ $i + 1 }}</span>
-                        @endif
-                    </button>
-                @endforeach
+    <div class="mx-auto mb-8" style="width: 320px; height: 320px;">
+        <div class="game-board relative" style="width: 320px; height: 320px; background: #2c3e50; border-radius: 8px; padding: 20px;">
+            <!-- Hashtag Grid Lines -->
+            <div class="grid-lines absolute inset-0" style="margin: 20px;">
+                <!-- Vertical lines -->
+                <div class="absolute bg-slate-300 dark:bg-slate-500" style="width: 3px; height: 280px; left: 93.33px; top: 0;"></div>
+                <div class="absolute bg-slate-300 dark:bg-slate-500" style="width: 3px; height: 280px; left: 186.67px; top: 0;"></div>
+                <!-- Horizontal lines -->
+                <div class="absolute bg-slate-300 dark:bg-slate-500" style="height: 3px; width: 280px; top: 93.33px; left: 0;"></div>
+                <div class="absolute bg-slate-300 dark:bg-slate-500" style="height: 3px; width: 280px; top: 186.67px; left: 0;"></div>
             </div>
+            
+            <!-- Game Cells -->
+            @foreach ($board as $i => $cell)
+                @php
+                    $row = floor($i / 3);
+                    $col = $i % 3;
+                    $left = 20 + ($col * 93.33);
+                    $top = 20 + ($row * 93.33);
+                @endphp
+                <button 
+                    wire:click="play({{ $i }})" 
+                    x-on:touchstart="onTouchStart($event, {{ $i }})"
+                    class="game-cell absolute transition-all duration-200 flex items-center justify-center
+                    @if(!$isGameActive || $cell !== null) cursor-default @else hover:bg-white/10 cursor-pointer @endif
+                    @if(in_array($i, $winningLine)) 
+                        bg-green-500/20 animate-pulse
+                    @elseif($lastMove === $i)
+                        bg-blue-500/20
+                    @endif
+                    text-6xl font-bold
+                    @if($cell === 'X')
+                        text-blue-400
+                    @elseif($cell === 'O')
+                        text-red-400
+                    @else
+                        text-gray-500
+                    @endif
+                    "
+                    style="
+                        width: 90px; 
+                        height: 90px; 
+                        left: {{ $left }}px; 
+                        top: {{ $top }}px;
+                        border-radius: 4px;
+                    ">
+                    @if($cell === 'X')
+                        <svg class="cell-content @if($lastMove === $i) animate-bounce @endif" width="50" height="50" viewBox="0 0 50 50">
+                            <path d="M8 8 L42 42 M42 8 L8 42" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
+                    @elseif($cell === 'O')
+                        <svg class="cell-content @if($lastMove === $i) animate-bounce @endif" width="50" height="50" viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="18" fill="none" stroke="currentColor" stroke-width="4"/>
+                        </svg>
+                    @else
+                        <span class="cell-number opacity-20 text-xs">{{ $i + 1 }}</span>
+                    @endif
+                </button>
+            @endforeach
         </div>
     </div>
 
