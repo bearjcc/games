@@ -5,6 +5,9 @@
     the liminal aesthetic - present and available without being flashy.
 --}}
 
+{{-- Include utility classes for all games --}}
+<x-game.utilities />
+
 <style>
     /* Game Container Base */
     .game-container {
