@@ -234,38 +234,38 @@ x-on:keydown.window="
         $event.preventDefault();
     }
 ">
-    <x-game.styles />
-    <x-game.animations />
+    <x-game-styles />
     
-    <x-game.layout title="Sudoku">
-        <!-- Game Header -->
-        <div class="game-header">
-            <div class="game-status">
-                @if($state['gameComplete'])
-                    <div class="winner-indicator">
-                        Puzzle Complete! Score: {{ app(SudokuGame::class)->getScore($state) }}
-                        <div class="text-sm">
-                            Time: <span x-text="formatTime(timer)"></span> | 
-                            Hints: {{ $state['hintsUsed'] }}/{{ $state['maxHints'] }} |
-                            Mistakes: {{ $state['mistakes'] }}/{{ $state['maxMistakes'] }}
-                        </div>
+    <x-game-layout title="Sudoku" 
+                   description="Classic number puzzle - fill the 9×9 grid so each row, column, and 3×3 box contains digits 1-9 exactly once!"
+                   difficulty="Medium" 
+                   estimatedDuration="10-60 minutes">
+        <!-- Game Status -->
+        <div class="game-status">
+            @if($state['gameComplete'])
+                <div class="winner-indicator">
+                    🎉 Puzzle Complete! Score: {{ app(SudokuGame::class)->getScore($state) }}
+                    <div class="text-sm mt-2">
+                        Time: <span x-text="formatTime(timer)"></span> | 
+                        Hints: {{ $state['hintsUsed'] }}/{{ $state['maxHints'] }} |
+                        Mistakes: {{ $state['mistakes'] }}/{{ $state['maxMistakes'] }}
                     </div>
-                @else
-                    <div class="player-indicator">
-                        Difficulty: {{ ucfirst($selectedDifficulty) }}
-                        <div class="text-sm">
-                            Progress: {{ $this->getProgressPercentage() }}% |
-                            Time: <span x-text="formatTime(timer)"></span> |
-                            Hints: {{ $state['hintsUsed'] }}/{{ $state['maxHints'] }}
-                        </div>
+                </div>
+            @else
+                <div class="player-indicator">
+                    Difficulty: {{ ucfirst($selectedDifficulty) }}
+                    <div class="text-sm mt-2">
+                        Progress: {{ $this->getProgressPercentage() }}% |
+                        Time: <span x-text="formatTime(timer)"></span> |
+                        Hints: {{ $state['hintsUsed'] }}/{{ $state['maxHints'] }}
                     </div>
-                @endif
-            </div>
+                </div>
+            @endif
         </div>
 
         <!-- Game Board Container -->
         <div class="game-board-container">
-            <div class="sudoku-game-board">
+            <div class="game-board sudoku-game-board">
                 <!-- Main Sudoku Grid -->
                 <div class="sudoku-grid-container">
                     <div class="sudoku-grid">
@@ -295,7 +295,7 @@ x-on:keydown.window="
                 </div>
 
                 <!-- Game Controls Panel -->
-                <div class="controls-panel">
+                <div class="controls-panel fade-in">
                     <!-- Number Input -->
                     <div class="number-input">
                         <h4>Numbers</h4>
@@ -397,7 +397,7 @@ x-on:keydown.window="
             </button>
             
             @if($showInstructions)
-                <div class="instruction-content">
+                <div class="instruction-content slide-up">
                     <div class="instruction-section">
                         <h4>How to Play</h4>
                         <ul>
@@ -417,7 +417,7 @@ x-on:keydown.window="
                 </div>
             @endif
         </div>
-    </x-game.layout>
+    </x-game-layout>
 
     <style>
         /* Sudoku Grid Styles */

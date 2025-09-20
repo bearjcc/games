@@ -43,12 +43,26 @@ describe('Sudoku Game Feature', function () {
         $game = new SudokuGame();
         $state = $game->initialState();
         
+        // Find an empty cell for testing
+        $emptyCell = null;
+        for ($row = 0; $row < 9; $row++) {
+            for ($col = 0; $col < 9; $col++) {
+                if ($state['originalPuzzle'][$row][$col] === 0) {
+                    $emptyCell = [$row, $col];
+                    break 2;
+                }
+            }
+        }
+        
+        expect($emptyCell)->not->toBeNull();
+        [$testRow, $testCol] = $emptyCell;
+        
         // Valid place number move
-        $validMove = ['action' => 'place_number', 'row' => 0, 'col' => 0, 'number' => 5];
+        $validMove = ['action' => 'place_number', 'row' => $testRow, 'col' => $testCol, 'number' => 5];
         expect($game->validateMove($state, $validMove))->toBeTrue();
         
         // Valid note toggle move
-        $validNote = ['action' => 'toggle_note', 'row' => 0, 'col' => 0, 'number' => 3];
+        $validNote = ['action' => 'toggle_note', 'row' => $testRow, 'col' => $testCol, 'number' => 3];
         expect($game->validateMove($state, $validNote))->toBeTrue();
         
         // Valid cell selection
