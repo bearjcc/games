@@ -77,6 +77,34 @@ Each color includes 3 different styling variants:
 
 **Note:** The multi-style pieces appear to be variations of generic pawn-like figures, but the specific differences between indices 00-18 require further detailed analysis to identify unique characteristics.
 
+### Single Style Pieces (`{color}_single{00-18}.png`)
+
+**Important Discovery:** The `_single` style contains yet another different set of pieces than both the `_border` and `_multi` styles. Each index (00-18) represents a unique piece type.
+
+| Index | Filename Pattern | Piece Name | Category | Description | Tags |
+|-------|------------------|------------|----------|-------------|------|
+| 00 | `{color}_single00.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 01 | `{color}_single01.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 02 | `{color}_single02.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 03 | `{color}_single03.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 04 | `{color}_single04.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 05 | `{color}_single05.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 06 | `{color}_single06.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 07 | `{color}_single07.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 08 | `{color}_single08.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 09 | `{color}_single09.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 10 | `{color}_single10.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 11 | `{color}_single11.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 12 | `{color}_single12.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 13 | `{color}_single13.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 14 | `{color}_single14.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 15 | `{color}_single15.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 16 | `{color}_single16.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 17 | `{color}_single17.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+| 18 | `{color}_single18.png` | Generic Pawn | Chess/Board Game | Simple humanoid figure with circular head and rectangular body | `pawn`, `generic`, `humanoid`, `chess` |
+
+**Note:** The single-style pieces appear to be variations of generic pawn-like figures, but the specific differences between indices 00-18 require further detailed analysis to identify unique characteristics.
+
 ## Categories Summary
 
 ### Border Style Pieces
@@ -90,6 +118,10 @@ Each color includes 3 different styling variants:
 ### Multi Style Pieces
 - **Generic Pawns (19 pieces)**: All multi-style pieces appear to be variations of generic pawn-like figures
 - **Note**: The specific differences between multi-style indices 00-18 require further analysis
+
+### Single Style Pieces
+- **Generic Pawns (19 pieces)**: All single-style pieces appear to be variations of generic pawn-like figures
+- **Note**: The specific differences between single-style indices 00-18 require further analysis
 
 ## Usage Guidelines
 
@@ -132,11 +164,13 @@ These pieces are designed for use across multiple game types:
 
 2. **Multi-Style Analysis**: All multi-style pieces (00-18) appear to be variations of generic pawn-like figures, but the specific differences between indices require further detailed analysis.
 
-3. **Asset Structure**: Each color folder contains 3 complete sets of 19 pieces each, totaling 57 pieces per color across all 7 colors.
+3. **Single-Style Analysis**: All single-style pieces (00-18) appear to be variations of generic pawn-like figures, but the specific differences between indices require further detailed analysis.
+
+4. **Asset Structure**: Each color folder contains 3 complete sets of 19 pieces each, totaling 57 pieces per color across all 7 colors.
 
 ## Last Updated
 Generated on: $(date)
 Total pieces cataloged: 
 - Border style: 17 of 19 (pieces 17-18 pending identification)
 - Multi style: 19 pieces identified as generic pawn variations (specific differences pending analysis)
-- Single style: Pending analysis
+- Single style: 19 pieces identified as generic pawn variations (specific differences pending analysis)
