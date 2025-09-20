@@ -1,0 +1,560 @@
+<?php
+
+namespace App\Services;
+
+use App\Games\Contracts\GameInterface;
+
+/**
+ * Universal Hint Engine for providing intelligent game suggestions
+ * across different game types and complexities
+ */
+class HintEngine
+{
+    /**
+     * Get hints for a game state
+     */
+    public static function getHints(GameInterface $game, array $state, array $options = []): array
+    {
+        $hints = [];
+        $gameId = $game->id();
+        
+        // Route to game-specific hint logic
+        switch ($gameId) {
+            case 'solitaire':
+                $hints = self::getSolitaireHints($state, $options);
+                break;
+                
+            case '2048':
+                $hints = self::get2048Hints($state, $options);
+                break;
+                
+            case 'tic-tac-toe':
+                $hints = self::getTicTacToeHints($state, $options);
+                break;
+                
+            default:
+                $hints = self::getGenericHints($game, $state, $options);
+                break;
+        }
+        
+        // Apply universal hint filtering and ranking
+        return self::rankAndFilterHints($hints, $options);
+    }
+
+    /**
+     * Get sophisticated hints for Solitaire
+     */
+    private static function getSolitaireHints(array $state, array $options): array
+    {
+        $hints = [];
+        $difficulty = $options['difficulty'] ?? 'beginner';
+        
+        // Immediate moves (always show these)
+        $immediateHints = self::getSolitaireImmediateHints($state);
+        $hints = array_merge($hints, $immediateHints);
+        
+        // Strategic hints based on difficulty
+        if ($difficulty !== 'minimal') {
+            $strategicHints = self::getSolitaireStrategicHints($state, $difficulty);
+            $hints = array_merge($hints, $strategicHints);
+        }
+        
+        // Advanced multi-step hints for experienced players
+        if ($difficulty === 'expert') {
+            $advancedHints = self::getSolitaireAdvancedHints($state);
+            $hints = array_merge($hints, $advancedHints);
+        }
+        
+        return $hints;
+    }
+
+    /**
+     * Get immediate move hints for Solitaire
+     */
+    private static function getSolitaireImmediateHints(array $state): array
+    {
+        $hints = [];
+        
+        // Check for foundation moves (highest priority)
+        $wasteCard = self::getWasteCard($state);
+        if ($wasteCard) {
+            foreach (['hearts', 'diamonds', 'clubs', 'spades'] as $suit) {
+                if (self::canPlaceOnFoundation($wasteCard, $state['foundations'][$suit])) {
+                    $hints[] = [
+                        'type' => 'immediate',
+                        'priority' => 10,
+                        'action' => 'waste_to_foundation',
+                        'description' => "Move {$wasteCard['rank']} of {$wasteCard['suit']} to foundation",
+                        'target' => $suit,
+                        'reasoning' => 'Foundation moves are always beneficial'
+                    ];
+                }
+            }
+        }
+        
+        // Check tableau to foundation moves
+        for ($col = 0; $col < 7; $col++) {
+            if (!empty($state['tableau'][$col])) {
+                $topCard = end($state['tableau'][$col]);
+                if ($topCard['faceUp']) {
+                    foreach (['hearts', 'diamonds', 'clubs', 'spades'] as $suit) {
+                        if (self::canPlaceOnFoundation($topCard, $state['foundations'][$suit])) {
+                            $hints[] = [
+                                'type' => 'immediate',
+                                'priority' => 9,
+                                'action' => 'tableau_to_foundation',
+                                'description' => "Move {$topCard['rank']} of {$topCard['suit']} to foundation",
+                                'source' => $col,
+                                'target' => $suit,
+                                'reasoning' => 'Clears tableau card and builds foundation'
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Check for face-down cards that can be revealed
+        for ($col = 0; $col < 7; $col++) {
+            if (!empty($state['tableau'][$col])) {
+                $topCard = end($state['tableau'][$col]);
+                if (!$topCard['faceUp']) {
+                    // See if we can move the covering card
+                    $coveringCard = count($state['tableau'][$col]) > 1 ? 
+                        $state['tableau'][$col][count($state['tableau'][$col]) - 2] : null;
+                    
+                    if ($coveringCard && $coveringCard['faceUp']) {
+                        $hints[] = [
+                            'type' => 'immediate',
+                            'priority' => 8,
+                            'action' => 'reveal_card',
+                            'description' => "Move {$coveringCard['rank']} of {$coveringCard['suit']} to reveal face-down card",
+                            'source' => $col,
+                            'reasoning' => 'Revealing face-down cards opens new possibilities'
+                        ];
+                    }
+                }
+            }
+        }
+        
+        return $hints;
+    }
+
+    /**
+     * Get strategic hints for Solitaire
+     */
+    private static function getSolitaireStrategicHints(array $state, string $difficulty): array
+    {
+        $hints = [];
+        
+        // Look for King placements in empty columns
+        if ($difficulty === 'intermediate' || $difficulty === 'expert') {
+            $emptyColumns = [];
+            for ($col = 0; $col < 7; $col++) {
+                if (empty($state['tableau'][$col])) {
+                    $emptyColumns[] = $col;
+                }
+            }
+            
+            if (!empty($emptyColumns)) {
+                // Check waste for Kings
+                $wasteCard = self::getWasteCard($state);
+                if ($wasteCard && $wasteCard['rank'] === 'K') {
+                    $hints[] = [
+                        'type' => 'strategic',
+                        'priority' => 7,
+                        'action' => 'waste_to_tableau',
+                        'description' => "Move King of {$wasteCard['suit']} to empty column",
+                        'target' => $emptyColumns[0],
+                        'reasoning' => 'Kings in empty columns create more building opportunities'
+                    ];
+                }
+                
+                // Check tableau for accessible Kings
+                for ($col = 0; $col < 7; $col++) {
+                    if (!empty($state['tableau'][$col])) {
+                        $topCard = end($state['tableau'][$col]);
+                        if ($topCard['faceUp'] && $topCard['rank'] === 'K' && count($state['tableau'][$col]) > 1) {
+                            $hints[] = [
+                                'type' => 'strategic',
+                                'priority' => 6,
+                                'action' => 'tableau_to_tableau',
+                                'description' => "Move King of {$topCard['suit']} to empty column",
+                                'source' => $col,
+                                'target' => $emptyColumns[0],
+                                'reasoning' => 'This may reveal a face-down card and improve tableau organization'
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Look for sequence building opportunities
+        $buildingHints = self::getSolitaireSequenceBuildingHints($state);
+        $hints = array_merge($hints, $buildingHints);
+        
+        return $hints;
+    }
+
+    /**
+     * Get sequence building hints for Solitaire
+     */
+    private static function getSolitaireSequenceBuildingHints(array $state): array
+    {
+        $hints = [];
+        
+        $wasteCard = self::getWasteCard($state);
+        if (!$wasteCard) {
+            return $hints;
+        }
+        
+        // Check if waste card can build on tableau
+        for ($col = 0; $col < 7; $col++) {
+            if (empty($state['tableau'][$col])) {
+                if ($wasteCard['rank'] === 'K') {
+                    $hints[] = [
+                        'type' => 'building',
+                        'priority' => 5,
+                        'action' => 'waste_to_tableau',
+                        'description' => "Place King of {$wasteCard['suit']} in empty column {$col}",
+                        'target' => $col,
+                        'reasoning' => 'Start building a new sequence'
+                    ];
+                }
+            } else {
+                $topCard = end($state['tableau'][$col]);
+                if ($topCard['faceUp'] && self::canPlaceOnTableau($wasteCard, $topCard)) {
+                    $sequenceValue = self::evaluateSequenceValue($state, $col, $wasteCard);
+                    $hints[] = [
+                        'type' => 'building',
+                        'priority' => $sequenceValue,
+                        'action' => 'waste_to_tableau',
+                        'description' => "Place {$wasteCard['rank']} of {$wasteCard['suit']} on {$topCard['rank']} of {$topCard['suit']}",
+                        'target' => $col,
+                        'reasoning' => 'Continues tableau sequence'
+                    ];
+                }
+            }
+        }
+        
+        return $hints;
+    }
+
+    /**
+     * Get advanced multi-step hints for expert players
+     */
+    private static function getSolitaireAdvancedHints(array $state): array
+    {
+        $hints = [];
+        
+        // Look for complex multi-move sequences
+        // This would involve analyzing potential move chains
+        // For now, implement a basic version
+        
+        $hints[] = [
+            'type' => 'advanced',
+            'priority' => 3,
+            'action' => 'multi_step',
+            'description' => 'Consider drawing from stock to find better moves',
+            'reasoning' => 'Sometimes patience reveals better opportunities'
+        ];
+        
+        return $hints;
+    }
+
+    /**
+     * Get hints for 2048
+     */
+    private static function get2048Hints(array $state, array $options): array
+    {
+        $hints = [];
+        $grid = $state['grid'];
+        
+        // Corner strategy hint
+        $cornerHint = self::get2048CornerStrategy($grid);
+        if ($cornerHint) {
+            $hints[] = $cornerHint;
+        }
+        
+        // Merge opportunity hints
+        $mergeHints = self::get2048MergeHints($grid);
+        $hints = array_merge($hints, $mergeHints);
+        
+        return $hints;
+    }
+
+    /**
+     * Get corner strategy hint for 2048
+     */
+    private static function get2048CornerStrategy(array $grid): ?array
+    {
+        // Find the highest tile
+        $maxValue = 0;
+        $maxPos = null;
+        
+        for ($row = 0; $row < 4; $row++) {
+            for ($col = 0; $col < 4; $col++) {
+                if ($grid[$row][$col] > $maxValue) {
+                    $maxValue = $grid[$row][$col];
+                    $maxPos = [$row, $col];
+                }
+            }
+        }
+        
+        if (!$maxPos || $maxValue < 64) {
+            return null;
+        }
+        
+        // Check if highest tile is in a corner
+        $corners = [[0,0], [0,3], [3,0], [3,3]];
+        $isInCorner = in_array($maxPos, $corners);
+        
+        if (!$isInCorner) {
+            return [
+                'type' => 'strategic',
+                'priority' => 8,
+                'action' => 'corner_strategy',
+                'description' => 'Try to move your highest tile to a corner',
+                'reasoning' => 'Corner strategy helps maintain organization and prevents the highest tile from getting trapped'
+            ];
+        }
+        
+        return null;
+    }
+
+    /**
+     * Get merge hints for 2048
+     */
+    private static function get2048MergeHints(array $grid): array
+    {
+        $hints = [];
+        
+        // Check for available merges in each direction
+        $directions = [
+            'up' => [-1, 0],
+            'down' => [1, 0],
+            'left' => [0, -1],
+            'right' => [0, 1]
+        ];
+        
+        foreach ($directions as $direction => $delta) {
+            $mergeCount = self::count2048Merges($grid, $delta);
+            if ($mergeCount > 0) {
+                $hints[] = [
+                    'type' => 'tactical',
+                    'priority' => 5 + $mergeCount,
+                    'action' => 'merge',
+                    'description' => "Swipe {$direction} to merge {$mergeCount} tile(s)",
+                    'direction' => $direction,
+                    'reasoning' => 'Merging creates space and higher-value tiles'
+                ];
+            }
+        }
+        
+        return $hints;
+    }
+
+    /**
+     * Count potential merges in a direction for 2048
+     */
+    private static function count2048Merges(array $grid, array $delta): int
+    {
+        $merges = 0;
+        $dr = $delta[0];
+        $dc = $delta[1];
+        
+        for ($row = 0; $row < 4; $row++) {
+            for ($col = 0; $col < 4; $col++) {
+                $nextRow = $row + $dr;
+                $nextCol = $col + $dc;
+                
+                if ($nextRow >= 0 && $nextRow < 4 && $nextCol >= 0 && $nextCol < 4) {
+                    if ($grid[$row][$col] !== 0 && $grid[$row][$col] === $grid[$nextRow][$nextCol]) {
+                        $merges++;
+                    }
+                }
+            }
+        }
+        
+        return $merges;
+    }
+
+    /**
+     * Get hints for Tic Tac Toe
+     */
+    private static function getTicTacToeHints(array $state, array $options): array
+    {
+        $hints = [];
+        
+        if ($state['mode'] !== 'pass-play') {
+            return $hints; // AI handles hints
+        }
+        
+        $board = $state['board'];
+        $currentPlayer = $state['currentPlayer'];
+        
+        // Check for winning moves
+        $winMove = self::findTicTacToeWinningMove($board, $currentPlayer);
+        if ($winMove !== null) {
+            $hints[] = [
+                'type' => 'critical',
+                'priority' => 10,
+                'action' => 'winning_move',
+                'description' => 'You can win by playing in this position!',
+                'position' => $winMove,
+                'reasoning' => 'Always take the winning move when available'
+            ];
+        }
+        
+        // Check for blocking moves
+        $opponent = $currentPlayer === 'X' ? 'O' : 'X';
+        $blockMove = self::findTicTacToeWinningMove($board, $opponent);
+        if ($blockMove !== null) {
+            $hints[] = [
+                'type' => 'defensive',
+                'priority' => 9,
+                'action' => 'blocking_move',
+                'description' => 'Block your opponent from winning!',
+                'position' => $blockMove,
+                'reasoning' => 'Prevent opponent victory'
+            ];
+        }
+        
+        return $hints;
+    }
+
+    /**
+     * Find winning move for Tic Tac Toe
+     */
+    private static function findTicTacToeWinningMove(array $board, string $player): ?int
+    {
+        for ($i = 0; $i < 9; $i++) {
+            if ($board[$i] === null) {
+                $testBoard = $board;
+                $testBoard[$i] = $player;
+                
+                if (self::checkTicTacToeWin($testBoard, $player)) {
+                    return $i;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Check for Tic Tac Toe win
+     */
+    private static function checkTicTacToeWin(array $board, string $player): bool
+    {
+        $winLines = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+        
+        foreach ($winLines as $line) {
+            if ($board[$line[0]] === $player && 
+                $board[$line[1]] === $player && 
+                $board[$line[2]] === $player) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Get generic hints for unknown games
+     */
+    private static function getGenericHints(GameInterface $game, array $state, array $options): array
+    {
+        $hints = [];
+        
+        // Basic hint about using auto-move if available
+        $hints[] = [
+            'type' => 'generic',
+            'priority' => 1,
+            'action' => 'explore',
+            'description' => 'Look for patterns and optimal moves',
+            'reasoning' => 'Every game has underlying strategies to discover'
+        ];
+        
+        return $hints;
+    }
+
+    /**
+     * Rank and filter hints based on options
+     */
+    private static function rankAndFilterHints(array $hints, array $options): array
+    {
+        $maxHints = $options['maxHints'] ?? 3;
+        $minPriority = $options['minPriority'] ?? 1;
+        
+        // Filter by minimum priority
+        $filtered = array_filter($hints, function($hint) use ($minPriority) {
+            return ($hint['priority'] ?? 0) >= $minPriority;
+        });
+        
+        // Sort by priority (descending)
+        usort($filtered, function($a, $b) {
+            return ($b['priority'] ?? 0) - ($a['priority'] ?? 0);
+        });
+        
+        // Limit to max hints
+        return array_slice($filtered, 0, $maxHints);
+    }
+
+    // Helper methods for Solitaire
+    private static function getWasteCard(array $state): ?array
+    {
+        if ($state['wasteIndex'] >= 0 && isset($state['waste'][$state['wasteIndex']])) {
+            return $state['waste'][$state['wasteIndex']];
+        }
+        return null;
+    }
+
+    private static function canPlaceOnFoundation(array $card, array $foundation): bool
+    {
+        if (empty($foundation)) {
+            return $card['rank'] === 'A';
+        }
+        
+        $topCard = end($foundation);
+        return $card['suit'] === $topCard['suit'] && 
+               self::getCardValue($card['rank']) === self::getCardValue($topCard['rank']) + 1;
+    }
+
+    private static function canPlaceOnTableau(array $card, array $targetCard): bool
+    {
+        $cardValue = self::getCardValue($card['rank']);
+        $targetValue = self::getCardValue($targetCard['rank']);
+        
+        $cardColor = in_array($card['suit'], ['hearts', 'diamonds']) ? 'red' : 'black';
+        $targetColor = in_array($targetCard['suit'], ['hearts', 'diamonds']) ? 'red' : 'black';
+        
+        return $cardValue === $targetValue - 1 && $cardColor !== $targetColor;
+    }
+
+    private static function getCardValue(string $rank): int
+    {
+        return match($rank) {
+            'A' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7,
+            '8' => 8, '9' => 9, '10' => 10, 'J' => 11, 'Q' => 12, 'K' => 13
+        };
+    }
+
+    private static function evaluateSequenceValue(array $state, int $col, array $card): int
+    {
+        // Simple heuristic - prioritize moves that reveal face-down cards
+        if (count($state['tableau'][$col]) > 1) {
+            $secondCard = $state['tableau'][$col][count($state['tableau'][$col]) - 2];
+            if (!$secondCard['faceUp']) {
+                return 6; // Higher priority for revealing cards
+            }
+        }
+        
+        return 4; // Standard building priority
+    }
+}

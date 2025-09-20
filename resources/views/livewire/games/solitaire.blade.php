@@ -4,6 +4,7 @@ use App\Games\Solitaire\SolitaireGame;
 use App\Games\Solitaire\SolitaireEngine;
 use App\Models\User;
 use App\Services\UserBestScoreService;
+use App\Services\HintEngine;
 use Livewire\Volt\Component;
 
 new class extends Component
@@ -21,6 +22,8 @@ new class extends Component
     public $gameMode = 'standard';
     public $difficulty = 'normal';
     public $drawCount = 3;
+    public $showHints = false;
+    public $hintDifficulty = 'beginner';
 
     public function mount()
     {
@@ -248,6 +251,26 @@ new class extends Component
         $this->resetGame();
     }
 
+    public function getHints()
+    {
+        $game = new SolitaireGame();
+        return HintEngine::getHints($game, $this->state, [
+            'difficulty' => $this->hintDifficulty,
+            'maxHints' => 5,
+            'minPriority' => 1
+        ]);
+    }
+
+    public function toggleHints()
+    {
+        $this->showHints = !$this->showHints;
+    }
+
+    public function setHintDifficulty($difficulty)
+    {
+        $this->hintDifficulty = $difficulty;
+    }
+
     private function checkGameWon()
     {
         if (SolitaireEngine::isGameWon($this->state)) {
@@ -454,6 +477,9 @@ new class extends Component
                 <button wire:click="autoMove" class="game-btn auto-move-btn">
                     Auto Move
                 </button>
+                <button wire:click="toggleHints" class="game-btn hint-btn {{ $showHints ? 'active' : '' }}">
+                    💡 Hints
+                </button>
             </div>
 
             <div class="stats-section">
@@ -476,6 +502,12 @@ new class extends Component
                 </div>
             </div>
         </div>
+
+        <!-- Hint Panel -->
+        <x-game.hint-panel 
+            :hints="$this->getHints()" 
+            :show="$showHints" 
+            position="top-right" />
 
         <!-- Win Message -->
         @if($state['gameWon'])
@@ -899,6 +931,20 @@ new class extends Component
 
         .game-btn.disabled:hover {
             background: #6b7280;
+        }
+
+        .hint-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .hint-btn:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .hint-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transform: scale(1.05);
         }
 
         .stat-item {
