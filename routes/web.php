@@ -47,6 +47,7 @@ Volt::route('farkle', 'games.farkle')->name('farkle');
 Volt::route('mastermind', 'games.mastermind')->name('mastermind');
 Volt::route('phase10', 'games.phase10')->name('phase10');
 Volt::route('word-detective', 'games.word-detective')->name('word-detective');
+Volt::route('slitherlink', 'games.slitherlink')->name('slitherlink');
 
 // Print routes
 Route::get('games/{game}/print', function ($game) {
