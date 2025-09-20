@@ -20,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
             // Remove SampleGame from public listing
             $registry->register(new TicTacToeGame());
             $registry->register(new TwentyFortyEightGame());
+            $registry->register(new \App\Games\War\WarGame());
             return $registry;
         });
     }
