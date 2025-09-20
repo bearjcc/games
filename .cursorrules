@@ -1,0 +1,133 @@
+# Laravel Games Development Rules
+
+## Project Context
+This is a progressive game development challenge testing Laravel skills through building increasingly complex games. Focus on clean, reusable, testable code that scales across multiple games.
+
+## Architecture Patterns
+
+### Game Development
+- All games MUST implement `App\Games\Contracts\GameInterface`
+- Game logic goes in separate Engine classes (pure functions)
+- Livewire components handle UI state only
+- Register games in `AppServiceProvider`
+- Follow existing naming conventions: `{GameName}Game.php`, `{GameName}Engine.php`
+
+### Directory Structure
+```
+app/Games/{GameName}/
+├── {GameName}Game.php      # GameInterface implementation
+├── {GameName}Engine.php    # Game logic (pure functions)
+└── AI/{GameName}AI.php     # AI opponents (when needed)
+```
+
+### Testing Requirements
+- ALWAYS create both Unit and Feature tests for new games
+- Unit tests: `tests/Unit/Games/{GameName}/`
+- Feature tests: `tests/Feature/Games/{GameName}/`
+- Test game logic, UI interactions, and score tracking
+- Use descriptive test names: `it_can_detect_winning_condition`
+
+### Frontend Patterns
+- Use Livewire Volt for reactive components
+- Component files: `resources/views/livewire/games/{slug}.blade.php`
+- State management via Livewire properties
+- Leverage existing SVG assets in `resources/img/`
+- Follow Tailwind classes for consistency
+- Maintain dark/light mode compatibility
+
+## Code Quality Standards
+
+### PHP Standards
+- Type hints on all method parameters and returns
+- DocBlocks for complex methods and arrays
+- PSR-12 coding standards
+- Use Laravel Pint for formatting
+
+### Game State Management
+- Game states as associative arrays with typed keys
+- Immutable state transitions (return new state)
+- Validate moves before applying
+- Handle edge cases gracefully
+
+### Error Handling
+- Graceful degradation for invalid moves
+- Clear error messages for users
+- Log unexpected errors
+- Fail-safe defaults
+
+## Reusability Focus
+
+### Shared Components
+- Extract common UI patterns into Blade components
+- Create reusable game utilities in `app/Games/Shared/`
+- Share testing helpers across games
+- Build composable scoring systems
+
+### Performance
+- Minimize database queries (scores only)
+- Use efficient algorithms for game logic
+- Cache when beneficial, avoid over-caching
+- Consider memory usage for large game states
+
+## Documentation Requirements
+
+### Code Documentation
+- Update ARCHITECTURE.md for new patterns
+- Document complex algorithms inline
+- Maintain clear README sections for each game
+- Use conventional commits for changes
+
+### Self-Documentation
+- Use descriptive variable and method names
+- Extract magic numbers into named constants
+- Comment WHY, not WHAT
+- Keep functions focused and single-purpose
+
+## Testing Philosophy
+
+### Test-Driven Development
+- Write failing tests first for new features
+- Test edge cases and error conditions
+- Aim for high coverage without testing trivial code
+- Use factories for test data generation
+
+### Test Organization
+- Group related tests logically
+- Use setup methods to reduce duplication
+- Test one concept per test method
+- Make tests readable as documentation
+
+## AI Development (When Required)
+
+### Algorithm Choice
+- Use deterministic algorithms, not neural networks
+- Implement difficulty levels through lookahead depth
+- Minimax with alpha-beta pruning for strategy games
+- Heuristic evaluation functions for complex games
+
+### AI Integration
+- AI moves follow same interface as human moves
+- Configurable difficulty settings
+- Optional hints/suggestions for players
+- Fair play (no cheating through hidden information)
+
+## Deployment Considerations
+
+### Environment
+- Laravel Herd for local development
+- SQLite database for simplicity
+- Assume PowerShell 7 environment
+- Use `npm run dev` for asset watching
+
+### Git Workflow
+- Conventional commits with clear scopes
+- Commit after completing each game
+- Keep commits focused and atomic
+- Tag major milestones
+
+## Remember
+- Build incrementally, test thoroughly
+- Prioritize code reuse and maintainability
+- Focus on user experience and clean UI
+- Document decisions for future reference
+- This is a marathon, not a sprint - pace accordingly
