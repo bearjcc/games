@@ -80,7 +80,31 @@ new class extends Component {
     }
 }; ?>
 
-<section class="max-w-lg mx-auto p-6 select-none" x-data="{
+<div>
+    <x-game.styles />
+    <x-game.animations />
+    
+    <x-game.layout title="2048">
+        <!-- Game Header -->
+        <div class="game-header">
+            <div class="game-status">
+                @if($isWon && !$isGameOver)
+                    <div class="winner-indicator">
+                        You reached 2048! Keep going for a higher score.
+                    </div>
+                @elseif($isGameOver)
+                    <div class="draw-indicator">
+                        Game Over! No more moves possible.
+                    </div>
+                @else
+                    <div class="player-indicator">
+                        Combine tiles to reach 2048!
+                    </div>
+                @endif
+            </div>
+        </div>
+
+<section class="select-none" x-data="{
     startX: 0, startY: 0, threshold: 50,
     onKey(e) {
         if (['ArrowUp','KeyW'].includes(e.code)) { $wire.move('up'); }
@@ -119,210 +143,113 @@ new class extends Component {
 x-on:keydown.window.prevent="onKey($event)"
 x-on:touchstart.prevent="onTouchStart($event)"
 x-on:touchend.prevent="onTouchEnd($event)">
-    <h1 class="text-3xl font-bold mb-4 text-center">2048</h1>
-    
-    <div class="flex justify-between mb-6">
-        <div class="text-center">
-            <div class="text-sm opacity-80">Score</div>
-            <div class="text-xl font-bold score-display" x-data="{ score: {{ $score }}, previousScore: {{ $previousScore }} }" 
-                 x-effect="if (score !== previousScore) { $el.style.transform = 'scale(1.2)'; setTimeout(() => $el.style.transform = 'scale(1)', 200); }">
-                {{ number_format($score) }}
-            </div>
-            @if($score > $previousScore)
-                <div class="text-green-500 text-sm font-bold score-gain" style="animation: scoreGain 1s ease-out;">
-                    +{{ number_format($score - $previousScore) }}
+        <!-- Game Info Panel -->
+        <div class="game-info">
+            <h3>Game Stats</h3>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Score:</span>
+                    <span class="stat-value" x-data="{ score: {{ $score }}, previousScore: {{ $previousScore }} }" 
+                          x-effect="if (score !== previousScore) { $el.classList.add('scale-in'); setTimeout(() => $el.classList.remove('scale-in'), 200); }">
+                        {{ number_format($score) }}
+                    </span>
                 </div>
-            @endif
-        </div>
-        @auth
-        <div class="text-center">
-            <div class="text-sm opacity-80">Best</div>
-            <div class="text-xl font-bold">{{ number_format($best) }}</div>
-        </div>
-        @endauth
-    </div>
-    
-    @if($isWon && !$isGameOver)
-        <div class="bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-700 rounded p-4 mb-4 text-center">
-            🎉 <strong>You won!</strong> You reached 2048! Keep playing to get a higher score.
-        </div>
-    @endif
-    
-    @if($isGameOver)
-        <div class="bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded p-4 mb-4 text-center">
-            <strong>Game Over!</strong> No more moves possible.
-        </div>
-    @endif
-    
-    <!-- Game Grid with proper layout -->
-    <div class="game-container mx-auto" style="width: 350px; height: 350px; position: relative; background-color: #bbada0; border-radius: 10px; padding: 10px;">
-        <div class="grid-container" style="position: absolute; z-index: 1;">
-            @for ($i = 0; $i < 16; $i++)
-                <div class="grid-cell" style="
-                    position: absolute;
-                    width: 70px;
-                    height: 70px;
-                    background-color: rgba(238, 228, 218, 0.35);
-                    border-radius: 3px;
-                    top: {{ floor($i / 4) * 80 + 10 }}px;
-                    left: {{ ($i % 4) * 80 + 10 }}px;
-                "></div>
-            @endfor
-        </div>
-        <div class="tile-container" style="position: absolute; z-index: 2;">
-            @foreach ($board as $i => $tile)
-                @if($tile > 0)
-                    <div class="tile tile-{{ $tile }} @if(in_array($i, $newTiles)) tile-new @endif @if(in_array($i, $mergedTiles)) tile-merged @endif" 
-                         style="
-                        position: absolute;
-                        width: 70px;
-                        height: 70px;
-                        border-radius: 3px;
-                        font-weight: bold;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-                        top: {{ floor($i / 4) * 80 + 10 }}px;
-                        left: {{ ($i % 4) * 80 + 10 }}px;
-                        @if($tile === 2)
-                            background-color: #eee4da; color: #776e65; font-size: 18px;
-                        @elseif($tile === 4)
-                            background-color: #ede0c8; color: #776e65; font-size: 18px;
-                        @elseif($tile === 8)
-                            background-color: #f2b179; color: #f9f6f2; font-size: 18px;
-                        @elseif($tile === 16)
-                            background-color: #f59563; color: #f9f6f2; font-size: 17px;
-                        @elseif($tile === 32)
-                            background-color: #f67c5f; color: #f9f6f2; font-size: 17px;
-                        @elseif($tile === 64)
-                            background-color: #f65e3b; color: #f9f6f2; font-size: 17px;
-                        @elseif($tile === 128)
-                            background-color: #edcf72; color: #f9f6f2; font-size: 15px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.14286);
-                        @elseif($tile === 256)
-                            background-color: #edcc61; color: #f9f6f2; font-size: 15px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.24), inset 0 0 0 1px rgba(255, 255, 255, 0.19048);
-                        @elseif($tile === 512)
-                            background-color: #edc850; color: #f9f6f2; font-size: 15px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.23810);
-                        @elseif($tile === 1024)
-                            background-color: #edc53f; color: #f9f6f2; font-size: 13px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.28571);
-                        @elseif($tile === 2048)
-                            background-color: #edc22e; color: #f9f6f2; font-size: 13px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.33333); animation: tile-glow 1.5s ease-in-out infinite alternate;
-                        @else
-                            background-color: #3c3a32; color: #f9f6f2; font-size: 11px;
-                        @endif
-                    ">{{ number_format($tile) }}</div>
+                @auth
+                <div class="stat-item">
+                    <span class="stat-label">Best:</span>
+                    <span class="stat-value">{{ number_format($best) }}</span>
+                </div>
+                @endauth
+                @if($score > $previousScore)
+                    <div class="stat-item">
+                        <span class="stat-label">Gained:</span>
+                        <span class="stat-value fade-in" style="color: rgb(34 197 94);">
+                            +{{ number_format($score - $previousScore) }}
+                        </span>
+                    </div>
                 @endif
-            @endforeach
+            </div>
         </div>
-    </div>
-    
-    <style>
-        @keyframes tile-glow {
-            0% { 
-                box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.33333);
-                transform: scale(1);
-            }
-            100% { 
-                box-shadow: 0 0 40px 15px rgba(243, 215, 116, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-                transform: scale(1.02);
-            }
-        }
-        
-        @keyframes tile-spawn {
-            0% { 
-                transform: scale(0);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 0.8;
-            }
-            100% { 
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes tile-merge {
-            0% { 
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.15);
-            }
-            100% { 
-                transform: scale(1);
-            }
-        }
-        
-        @keyframes scoreGain {
-            0% { 
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% { 
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-        }
-        
-        .game-container {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            touch-action: none;
-        }
-        
-        .tile {
-            font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
-            user-select: none;
-            will-change: transform, top, left;
-        }
-        
-        .tile-new {
-            animation: tile-spawn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        
-        .tile-merged {
-            animation: tile-merge 0.15s ease-in-out;
-        }
-        
-        .tile:hover {
-            transform: scale(1.05) !important;
-            z-index: 10;
-        }
-        
-        .score-display {
-            transition: transform 0.2s ease-in-out;
-        }
-        
-        .score-gain {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-    </style>
-    <div class="mt-6 text-center">
-        <div class="text-sm opacity-80 mb-3">
-            <span class="hidden sm:inline">Use arrow keys or WASD to play</span>
-            <span class="sm:hidden">Swipe to play</span>
+        <!-- Game Board -->
+        <div class="game-board-container">
+            <div class="twenty-forty-eight-board">
+                <!-- Background Grid -->
+                <div class="grid-background">
+                    @for ($i = 0; $i < 16; $i++)
+                        <div class="grid-cell"></div>
+                    @endfor
+                </div>
+                
+                <!-- Game Tiles -->
+                <div class="tiles-container">
+                    @foreach ($board as $i => $tile)
+                        @if($tile > 0)
+                            <x-game.tile
+                                :value="$tile"
+                                :position="$i"
+                                :isNew="in_array($i, $newTiles)"
+                                :isMerged="in_array($i, $mergedTiles)"
+                                class="game-transition" />
+                        @endif
+                    @endforeach
+                </div>
+            </div>
         </div>
-        <div class="flex justify-center gap-2">
-            <flux:button wire:click="move('up')" size="sm">↑</flux:button>
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button wire:click="resetBoard" class="game-button">
+                New Game
+            </button>
         </div>
-        <div class="flex justify-center gap-2 my-1">
-            <flux:button wire:click="move('left')" size="sm">←</flux:button>
-            <flux:button wire:click="move('down')" size="sm">↓</flux:button>
-            <flux:button wire:click="move('right')" size="sm">→</flux:button>
+        
+        <!-- Instructions -->
+        <div class="text-center text-sm opacity-75 mt-4">
+            <span class="hidden sm:inline">Use arrow keys or WASD to move</span>
+            <span class="sm:hidden">Swipe to move tiles</span>
         </div>
-        <div class="mt-4">
-            <flux:button wire:click="resetBoard" variant="subtle">New Game</flux:button>
-        </div>
-    </div>
-    
-    <div class="mt-6 text-center text-sm opacity-80">
-        Join tiles to reach <strong>2048</strong>!<br>
-        <a class="underline" href="{{ url('/games') }}">← Back to games</a>
-    </div>
+        
 </section>
+    </x-game.layout>
+</div>
+
+<style>
+    /* 2048 specific liminal styling */
+    .twenty-forty-eight-board {
+        position: relative;
+        width: 18rem;
+        height: 18rem;
+        margin: 0 auto;
+        background: rgb(203 213 225);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .dark .twenty-forty-eight-board {
+        background: rgb(71 85 105);
+    }
+
+    .grid-background {
+        position: absolute;
+        inset: 0.5rem;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+
+    .grid-cell {
+        background: rgb(226 232 240);
+        border-radius: 0.25rem;
+    }
+
+    .dark .grid-cell {
+        background: rgb(100 116 139);
+    }
+
+    .tiles-container {
+        position: absolute;
+        inset: 0.5rem;
+    }
+</style>
 
 
