@@ -290,6 +290,86 @@ Each color combination includes 4 different styling variants:
 - **Side**: Shows chip thickness from edge perspective
 - **Side Border**: Side view with enhanced border
 
+## Playing Card Back Assets Catalog
+
+### Asset Structure
+The project includes playing card back assets in 3 different colors:
+- **Blue** (`Cards/cardBack_blue*.png`)
+- **Green** (`Cards/cardBack_green*.png`)
+- **Red** (`Cards/cardBack_red*.png`)
+
+### Style Variants
+Each color includes 5 different styling variants:
+- `cardBack_{color}1.png` - Simple border design
+- `cardBack_{color}2.png` - Inner frame design
+- `cardBack_{color}3.png` - Subtle border design
+- `cardBack_{color}4.png` - Grid pattern with suit symbols
+- `cardBack_{color}5.png` - Center pattern with 2x2 suit arrangement
+
+### Total Card Back Assets
+**3 colors × 5 styles = 15 individual card back images**
+
+### Card Back Identification Catalog
+
+#### Blue Card Backs (`cardBack_blue*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| 1 | `cardBack_blue1.png` | Blue card back with simple border | `card`, `back`, `blue`, `simple`, `border` |
+| 2 | `cardBack_blue2.png` | Blue card back with inner frame | `card`, `back`, `blue`, `frame`, `border` |
+| 3 | `cardBack_blue3.png` | Blue card back with subtle border | `card`, `back`, `blue`, `subtle`, `border` |
+| 4 | `cardBack_blue4.png` | Blue card back with grid pattern | `card`, `back`, `blue`, `pattern`, `suits` |
+| 5 | `cardBack_blue5.png` | Blue card back with center pattern | `card`, `back`, `blue`, `center`, `suits` |
+
+#### Green Card Backs (`cardBack_green*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| 1 | `cardBack_green1.png` | Green card back with simple border | `card`, `back`, `green`, `simple`, `border` |
+| 2 | `cardBack_green2.png` | Green card back with inner frame | `card`, `back`, `green`, `frame`, `border` |
+| 3 | `cardBack_green3.png` | Green card back with subtle border | `card`, `back`, `green`, `subtle`, `border` |
+| 4 | `cardBack_green4.png` | Green card back with grid pattern | `card`, `back`, `green`, `pattern`, `suits` |
+| 5 | `cardBack_green5.png` | Green card back with center pattern | `card`, `back`, `green`, `center`, `suits` |
+
+#### Red Card Backs (`cardBack_red*.png`)
+
+| Style | Filename | Description | Tags |
+|-------|----------|-------------|------|
+| 1 | `cardBack_red1.png` | Red card back with simple border | `card`, `back`, `red`, `simple`, `border` |
+| 2 | `cardBack_red2.png` | Red card back with inner frame | `card`, `back`, `red`, `frame`, `border` |
+| 3 | `cardBack_red3.png` | Red card back with subtle border | `card`, `back`, `red`, `subtle`, `border` |
+| 4 | `cardBack_red4.png` | Red card back with grid pattern | `card`, `back`, `red`, `pattern`, `suits` |
+| 5 | `cardBack_red5.png` | Red card back with center pattern | `card`, `back`, `red`, `center`, `suits` |
+
+### Card Back Design Patterns
+
+#### Style 1 - Simple Border
+- Solid color background
+- Thin light gray/white border around perimeter
+- Clean, minimalist design
+
+#### Style 2 - Inner Frame
+- Solid color background
+- Light gray/white outer border
+- Darker inner rectangular border creating frame effect
+
+#### Style 3 - Subtle Border
+- Solid color background
+- Light gray/white outer border
+- Subtle darker inner border
+
+#### Style 4 - Grid Pattern
+- Solid color background
+- Light gray/white outer border
+- Repeating pattern of suit symbols (spades, hearts, clubs, diamonds) in grid
+- Alternating rows of different suit combinations
+
+#### Style 5 - Center Pattern
+- Solid color background
+- Light gray/white outer border
+- Four suit symbols arranged in 2x2 pattern in center
+- Subtle darker border around center pattern
+
 ## Categories Summary
 
 ### Border Style Pieces
@@ -319,6 +399,13 @@ Each color combination includes 4 different styling variants:
 - **Style Variants**: Standard, Border, Side, Side Border views for each color combination
 - **Casino Style**: Classic poker chip designs with segmented borders
 
+### Playing Card Back Assets
+- **Blue Card Backs (5 pieces)**: Complete set of 5 style variants
+- **Green Card Backs (5 pieces)**: Complete set of 5 style variants
+- **Red Card Backs (5 pieces)**: Complete set of 5 style variants
+- **Style Variants**: Simple border, Inner frame, Subtle border, Grid pattern, Center pattern
+- **Classic Design**: Traditional playing card back aesthetics with suit symbols
+
 ## Usage Guidelines
 
 ### File Naming Convention
@@ -346,6 +433,14 @@ Examples:
 - `chipRedWhite_border.png` - Red and white chip with border
 - `chipBlue_side.png` - Solid blue chip, side view
 - `chipGreenWhite_sideBorder.png` - Green and white chip, side view with border
+
+#### Playing Card Back Assets
+Card backs follow the pattern: `cardBack_{color}{style}.png`
+
+Examples:
+- `cardBack_blue1.png` - Blue card back with simple border
+- `cardBack_green4.png` - Green card back with grid pattern
+- `cardBack_red5.png` - Red card back with center pattern
 
 ### Asset Loading
 Use the `@images/` alias for proper Bootstrap bundling:
@@ -377,6 +472,15 @@ $this->dieImage = '@images/Dice/dieWhite5.png';
 $this->chipImage = '@images/Chips/chipBlue_side.png';
 ```
 
+#### Playing Card Back Assets
+```php
+// In Blade templates
+<img src="@images('Cards/cardBack_blue1.png')" alt="Blue Card Back">
+
+// In Livewire components
+$this->cardBackImage = '@images/Cards/cardBack_green4.png';
+```
+
 ### Game Integration
 
 #### Game Pieces
@@ -400,6 +504,13 @@ Chips are perfect for casino and betting games:
 - **Board games**: Monopoly, Risk, betting mechanics
 - **Educational games**: Money management, probability
 
+#### Playing Card Back Assets
+Card backs are essential for card games:
+- **Traditional card games**: Poker, Blackjack, Solitaire, Hearts
+- **Modern card games**: Uno, Phase 10, Crazy Eights
+- **Board games**: Monopoly Chance/Community Chest cards
+- **Educational games**: Memory games, matching activities
+
 ## Maintenance Notes
 
 - All color variants maintain consistent piece identification across styles
@@ -422,6 +533,8 @@ Chips are perfect for casino and betting games:
 
 6. **Poker Chip Assets**: Complete set of 32 chip images covering 8 color combinations in 4 style variants (standard, border, side, side border).
 
+7. **Playing Card Back Assets**: Complete set of 15 card back images covering 3 colors in 5 style variants (simple border, inner frame, subtle border, grid pattern, center pattern).
+
 ## Last Updated
 Generated on: $(date)
 Total assets cataloged: 
@@ -435,4 +548,8 @@ Total assets cataloged:
 - **Poker Chip Assets**: 32 total (8 color combinations × 4 styles)
   - Two-color chips: 20 pieces (BlackWhite, BlueWhite, GreenWhite, RedWhite, WhiteBlue)
   - Solid color chips: 12 pieces (Blue, Green, White)
-- **Grand Total**: **455 individual game assets**
+- **Playing Card Back Assets**: 15 total (3 colors × 5 styles)
+  - Blue card backs: 5 pieces (complete set of style variants)
+  - Green card backs: 5 pieces (complete set of style variants)
+  - Red card backs: 5 pieces (complete set of style variants)
+- **Grand Total**: **470 individual game assets**
