@@ -44,5 +44,6 @@ Volt::route('go-fish', 'games.go-fish')->name('go-fish');
 Volt::route('crazy-eights', 'games.crazy-eights')->name('crazy-eights');
 Volt::route('spider-solitaire', 'games.spider-solitaire')->name('spider-solitaire');
 Volt::route('farkle', 'games.farkle')->name('farkle');
+Volt::route('mastermind', 'games.mastermind')->name('mastermind');
 
 require __DIR__.'/auth.php';

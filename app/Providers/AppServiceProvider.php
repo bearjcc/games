@@ -20,6 +20,7 @@ use App\Games\GoFish\GoFishGame;
 use App\Games\CrazyEights\CrazyEightsGame;
 use App\Games\SpiderSolitaire\SpiderSolitaireGame;
 use App\Games\Farkle\FarkleGame;
+use App\Games\Mastermind\MastermindGame;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(new CrazyEightsGame());
             $registry->register(new SpiderSolitaireGame());
             $registry->register(new FarkleGame());
+            $registry->register(new MastermindGame());
             return $registry;
         });
     }
