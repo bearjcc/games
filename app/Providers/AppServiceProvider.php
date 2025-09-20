@@ -21,6 +21,7 @@ use App\Games\CrazyEights\CrazyEightsGame;
 use App\Games\SpiderSolitaire\SpiderSolitaireGame;
 use App\Games\Farkle\FarkleGame;
 use App\Games\Mastermind\MastermindGame;
+use App\Games\Phase10\Phase10Game;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -54,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(new SpiderSolitaireGame());
             $registry->register(new FarkleGame());
             $registry->register(new MastermindGame());
+            $registry->register(new Phase10Game());
             return $registry;
         });
     }
