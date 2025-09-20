@@ -27,5 +27,7 @@ Volt::route('tic-tac-toe', 'games.tic-tac-toe')->name('t3');
 Volt::route('2048', 'games.2048')->name('twozero');
 Volt::route('war', 'games.war')->name('war');
 Volt::route('solitaire', 'games.solitaire')->name('solitaire');
+Volt::route('nine-mens-morris', 'games.nine-mens-morris')->name('morris');
+Volt::route('peg-solitaire', 'games.peg-solitaire')->name('peg');
 
 require __DIR__.'/auth.php';

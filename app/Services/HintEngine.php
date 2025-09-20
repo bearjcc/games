@@ -32,6 +32,14 @@ class HintEngine
                 $hints = self::getTicTacToeHints($state, $options);
                 break;
                 
+            case 'nine-mens-morris':
+                $hints = self::getNineMensMorrisHints($state, $options);
+                break;
+                
+            case 'peg-solitaire':
+                $hints = self::getPegSolitaireHints($state, $options);
+                break;
+                
             default:
                 $hints = self::getGenericHints($game, $state, $options);
                 break;
@@ -556,5 +564,183 @@ class HintEngine
         }
         
         return 4; // Standard building priority
+    }
+
+    /**
+     * Get hints for Nine Men's Morris
+     */
+    private static function getNineMensMorrisHints(array $state, array $options): array
+    {
+        $hints = [];
+        $currentPlayer = $state['currentPlayer'];
+        $phase = $state['phase'];
+        
+        if ($state['mustCapture']) {
+            $hints[] = [
+                'type' => 'critical',
+                'priority' => 10,
+                'action' => 'capture',
+                'description' => 'You must capture an opponent piece!',
+                'reasoning' => 'Mill formed - capture is mandatory'
+            ];
+            return $hints;
+        }
+        
+        if ($phase === 'placement') {
+            // Suggest strategic placement positions
+            $hints[] = [
+                'type' => 'strategic',
+                'priority' => 7,
+                'action' => 'place_strategic',
+                'description' => 'Try to place pieces where you can form mills',
+                'reasoning' => 'Mills allow you to capture opponent pieces'
+            ];
+            
+            // Suggest blocking opponent mills
+            $hints[] = [
+                'type' => 'defensive',
+                'priority' => 8,
+                'action' => 'place_defensive',
+                'description' => 'Watch for opponent mill opportunities',
+                'reasoning' => 'Block potential opponent mills when possible'
+            ];
+        } else {
+            // Movement/Flying phase hints
+            $hints[] = [
+                'type' => 'tactical',
+                'priority' => 6,
+                'action' => 'move_tactical',
+                'description' => 'Look for moves that create mill opportunities',
+                'reasoning' => 'Strategic movement can set up multiple threats'
+            ];
+            
+            if ($phase === 'flying') {
+                $hints[] = [
+                    'type' => 'strategic',
+                    'priority' => 7,
+                    'action' => 'fly_strategic',
+                    'description' => 'Use flying ability to create unexpected mills',
+                    'reasoning' => 'Flying allows long-distance strategic plays'
+                ];
+            }
+        }
+        
+        return $hints;
+    }
+
+    /**
+     * Get hints for Peg Solitaire
+     */
+    private static function getPegSolitaireHints(array $state, array $options): array
+    {
+        $hints = [];
+        $pegsRemaining = $state['pegsRemaining'];
+        
+        // Get best move
+        $bestMove = self::getPegSolitaireBestMove($state);
+        if ($bestMove) {
+            $hints[] = [
+                'type' => 'immediate',
+                'priority' => 9,
+                'action' => 'best_move',
+                'description' => "Jump peg from position {$bestMove['from']} to {$bestMove['to']}",
+                'reasoning' => 'This move keeps the most options open'
+            ];
+        }
+        
+        // Strategy hints based on game progress
+        if ($pegsRemaining > 10) {
+            $hints[] = [
+                'type' => 'strategic',
+                'priority' => 6,
+                'action' => 'early_strategy',
+                'description' => 'Work from the outside toward the center',
+                'reasoning' => 'This creates more opportunities for later moves'
+            ];
+        } elseif ($pegsRemaining > 5) {
+            $hints[] = [
+                'type' => 'strategic',
+                'priority' => 7,
+                'action' => 'mid_strategy',
+                'description' => 'Look for moves that don\'t isolate pegs',
+                'reasoning' => 'Isolated pegs become impossible to remove'
+            ];
+        } else {
+            $hints[] = [
+                'type' => 'critical',
+                'priority' => 8,
+                'action' => 'end_strategy',
+                'description' => 'Plan carefully - few moves remaining!',
+                'reasoning' => 'Each move is crucial with few pegs left'
+            ];
+        }
+        
+        // Pattern recognition hint
+        if ($pegsRemaining <= 8) {
+            $hints[] = [
+                'type' => 'tactical',
+                'priority' => 5,
+                'action' => 'pattern_hint',
+                'description' => 'Look for L-shaped and triangular patterns',
+                'reasoning' => 'These patterns often lead to successful solutions'
+            ];
+        }
+        
+        return $hints;
+    }
+
+    /**
+     * Simple best move calculation for Peg Solitaire
+     */
+    private static function getPegSolitaireBestMove(array $state): ?array
+    {
+        // This would integrate with PegSolitaireEngine::getBestMove()
+        // For now, return a simple heuristic
+        $validMoves = self::getPegSolitaireValidMoves($state);
+        
+        if (empty($validMoves)) {
+            return null;
+        }
+        
+        // Prefer moves that keep more options open
+        $bestMove = null;
+        $bestScore = -1;
+        
+        foreach ($validMoves as $move) {
+            // Simple scoring: prefer moves toward center
+            $score = 15 - abs(7 - $move['to']); // Distance from center area
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestMove = $move;
+            }
+        }
+        
+        return $bestMove;
+    }
+
+    /**
+     * Get valid moves for Peg Solitaire (simplified version)
+     */
+    private static function getPegSolitaireValidMoves(array $state): array
+    {
+        // This is a simplified version - real implementation would use PegSolitaireEngine
+        $validMoves = [];
+        $board = $state['board'];
+        
+        // Basic jump patterns for triangular board
+        $patterns = [
+            [0, 1, 3], [0, 2, 5], [1, 3, 6], [1, 4, 8], [2, 4, 7], [2, 5, 9],
+            [3, 4, 5], [6, 7, 8], [7, 8, 9], [3, 6, 10], [4, 7, 11], [5, 8, 12]
+        ];
+        
+        foreach ($patterns as $pattern) {
+            [$from, $over, $to] = $pattern;
+            if ($from < 15 && $over < 15 && $to < 15 &&
+                $board[$from] && $board[$over] && !$board[$to]) {
+                $validMoves[] = ['from' => $from, 'over' => $over, 'to' => $to];
+            }
+        }
+        
+        return $validMoves;
     }
 }
