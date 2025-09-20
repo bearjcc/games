@@ -309,48 +309,101 @@ new class extends Component
 }; ?>
 
 <div>
+    <x-game.styles />
+    <x-game.animations />
+    
     <x-game.accessibility>
         @if($state['gameWon'])
             <div>Congratulations! You won Klondike Solitaire in {{ $state['moves'] }} moves!</div>
         @endif
     </x-game.accessibility>
 
-    <!-- Solitaire Table Layout -->
-    <div class="solitaire-table">
-        <!-- Header Area: Stock, Waste, and Foundations -->
+    <x-game.layout title="Solitaire">
+        <!-- Game Header -->
         <div class="game-header">
+            <div class="game-status">
+                @if($state['gameWon'])
+                    <div class="winner-indicator">
+                        Congratulations! You won in {{ $state['moves'] }} moves!
+                    </div>
+                @else
+                    <div class="game-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Moves:</span>
+                            <span class="stat-value">{{ $state['moves'] }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Score:</span>
+                            <span class="stat-value">{{ $this->getStats()['score'] }}</span>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Game Settings -->
+        <div class="game-settings">
+            <div class="setting-group">
+                <label>Mode:</label>
+                <select wire:change="setGameMode($event.target.value)" class="setting-select">
+                    <option value="standard" {{ $gameMode === 'standard' ? 'selected' : '' }}>Standard</option>
+                    <option value="vegas" {{ $gameMode === 'vegas' ? 'selected' : '' }}>Vegas</option>
+                    <option value="timed" {{ $gameMode === 'timed' ? 'selected' : '' }}>Timed</option>
+                </select>
+            </div>
+            
+            <div class="setting-group">
+                <label>Draw:</label>
+                <select wire:change="setDrawCount($event.target.value)" class="setting-select">
+                    <option value="1" {{ $drawCount === 1 ? 'selected' : '' }}>Draw 1</option>
+                    <option value="3" {{ $drawCount === 3 ? 'selected' : '' }}>Draw 3</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Solitaire Table Layout -->
+        <div class="solitaire-table">
+            <!-- Card Play Area: Stock, Waste, and Foundations -->
             <!-- Stock and Waste -->
             <div class="stock-waste-area">
                 <!-- Stock Pile -->
-                <div class="card-pile stock-pile" wire:click="drawFromStock">
+                <div class="card-pile" wire:click="drawFromStock">
                     @if(!empty($state['stock']))
-                        <div class="playing-card card-back" title="Draw cards ({{ count($state['stock']) }} remaining)">
+                        <x-game.card
+                            :faceUp="false"
+                            clickable="true"
+                            class="card-back hover-lift"
+                            title="Draw cards ({{ count($state['stock']) }} remaining)">
                             <div class="card-count-badge">{{ count($state['stock']) }}</div>
-                        </div>
+                        </x-game.card>
                     @else
-                        <div class="empty-pile stock-empty" title="Click to recycle waste pile">
+                        <x-game.card
+                            clickable="true"
+                            class="empty-pile hover-lift"
+                            title="Click to recycle waste pile">
                             <div class="pile-icon">↻</div>
-                        </div>
+                        </x-game.card>
                     @endif
                 </div>
 
                 <!-- Waste Pile -->
-                <div class="card-pile waste-pile">
+                <div class="card-pile">
                     @php $wasteCard = $this->getWasteCard(); @endphp
                     @if($wasteCard)
-                        <div class="playing-card draggable-card card-flip-animation" 
-                             style="background-image: url('{{ $this->getCardImageUrl($wasteCard) }}');"
-                             title="{{ $wasteCard['rank'] }} of {{ $wasteCard['suit'] }}"
-                             draggable="true"
-                             x-data
-                             @mousedown="$wire.startDragWaste()"
-                             @dragstart="$el.classList.add('dragging')"
-                             @dragend="$el.classList.remove('dragging'); $wire.clearDrag()">
-                        </div>
+                        <x-game.card
+                            :card="$wasteCard"
+                            :faceUp="true"
+                            draggable="true"
+                            animate="true"
+                            class="card-flip hover-lift"
+                            wire:mousedown="startDragWaste()"
+                            x-data
+                            @dragstart="$el.classList.add('dragging')"
+                            @dragend="$el.classList.remove('dragging'); $wire.clearDrag()" />
                     @else
-                        <div class="empty-pile waste-empty">
+                        <x-game.card class="empty-pile">
                             <div class="pile-label">Waste</div>
-                        </div>
+                        </x-game.card>
                     @endif
                 </div>
             </div>
@@ -358,7 +411,7 @@ new class extends Component
             <!-- Foundations -->
             <div class="foundations-area">
                 @foreach(['hearts', 'diamonds', 'clubs', 'spades'] as $suit)
-                    <div class="foundation-pile foundation-{{ $suit }} drop-zone" 
+                    <div class="foundation-pile drop-zone" 
                          wire:click="moveWasteToFoundation('{{ $suit }}')"
                          title="{{ ucfirst($suit) }} Foundation"
                          x-data
@@ -366,14 +419,16 @@ new class extends Component
                          @drop="$wire.dropOnFoundation('{{ $suit }}')">
                         @if(!empty($state['foundations'][$suit]))
                             @php $topCard = end($state['foundations'][$suit]); @endphp
-                            <div class="playing-card card-stack-animation" 
-                                 style="background-image: url('{{ $this->getCardImageUrl($topCard) }}');"
-                                 title="{{ $topCard['rank'] }} of {{ $topCard['suit'] }}">
-                            </div>
+                            <x-game.card
+                                :card="$topCard"
+                                :faceUp="true"
+                                animate="true"
+                                class="card-stack hover-lift" />
                         @else
-                            <div class="empty-pile foundation-empty foundation-{{ $suit }}">
-                                <div class="suit-icon">{{ ['hearts' => '♥', 'diamonds' => '♦', 'clubs' => '♣', 'spades' => '♠'][$suit] }}</div>
-                            </div>
+                            <x-game.card
+                                valid="true"
+                                class="foundation-empty hover-lift"
+                                suit="{{ $suit }}" />
                         @endif
                     </div>
                 @endforeach
@@ -390,35 +445,42 @@ new class extends Component
                      @drop="$wire.dropOnTableau({{ $col }})">
                     @if(empty($state['tableau'][$col]))
                         <!-- Empty column - only accepts Kings -->
-                        <div class="empty-pile tableau-empty" 
-                             wire:click="moveWasteToTableau({{ $col }})"
-                             title="Empty - Kings only">
+                        <x-game.card
+                            clickable="true"
+                            valid="true"
+                            class="tableau-empty hover-lift"
+                            wire:click="moveWasteToTableau({{ $col }})"
+                            title="Empty - Kings only">
                             <div class="pile-label">K</div>
-                        </div>
+                        </x-game.card>
                     @else
                         @foreach($state['tableau'][$col] as $index => $card)
-                            <div class="playing-card tableau-card {{ $card['faceUp'] ? 'face-up' : 'face-down' }} 
-                                      {{ $card['faceUp'] ? 'draggable-card' : '' }}
-                                      {{ $card['faceUp'] && $index === count($state['tableau'][$col]) - 1 ? 'card-flip-animation' : '' }}"
-                                 style="top: {{ $index * 20 }}px; background-image: url('{{ $this->getCardImageUrl($card) }}');"
-                                 data-col="{{ $col }}" 
-                                 data-index="{{ $index }}"
-                                 wire:click="moveTableauToFoundation({{ $col }}, '{{ $card['suit'] }}')"
-                                 title="{{ $card['faceUp'] ? $card['rank'] . ' of ' . $card['suit'] : 'Face down card' }}"
-                                 @if($card['faceUp']) 
-                                     draggable="true"
-                                     x-data
-                                     @mousedown="$wire.startDragTableau({{ $col }}, {{ $index }})"
-                                     @dragstart="$el.classList.add('dragging')"
-                                     @dragend="$el.classList.remove('dragging'); $wire.clearDrag()"
-                                 @endif>
+                            <x-game.card
+                                :card="$card"
+                                :faceUp="$card['faceUp']"
+                                :draggable="$card['faceUp']"
+                                :animate="$card['faceUp'] && $index === count($state['tableau'][$col]) - 1"
+                                stack="true"
+                                :stackIndex="$index"
+                                class="tableau-card {{ $card['faceUp'] ? 'face-up hover-lift' : 'face-down' }}"
+                                style="top: {{ $index * 20 }}px; z-index: {{ $index }};"
+                                data-col="{{ $col }}" 
+                                data-index="{{ $index }}"
+                                wire:click="moveTableauToFoundation({{ $col }}, '{{ $card['suit'] }}')"
+                                @if($card['faceUp']) 
+                                    x-data
+                                    @mousedown="$wire.startDragTableau({{ $col }}, {{ $index }})"
+                                    @dragstart="$el.classList.add('dragging')"
+                                    @dragend="$el.classList.remove('dragging'); $wire.clearDrag()"
+                                @endif>
+                                
                                 @if($card['faceUp'] && $index === count($state['tableau'][$col]) - 1)
                                     <!-- Add move indicators for top cards -->
                                     <div class="card-moves">
-                                        <button wire:click.stop="autoMove" class="auto-move-btn" title="Auto-move if possible">↑</button>
+                                        <button wire:click.stop="autoMove" class="auto-move-btn game-button" title="Auto-move if possible">↑</button>
                                     </div>
                                 @endif
-                            </div>
+                            </x-game.card>
                         @endforeach
                     @endif
                 </div>
@@ -456,31 +518,30 @@ new class extends Component
             </div>
         </div>
 
-        <!-- Game Controls and Stats -->
+        <!-- Game Controls -->
         <div class="game-controls">
-            <div class="control-section">
-                <button wire:click="resetGame" class="game-btn new-game-btn">
-                    New Game
-                </button>
-                <button wire:click="undo" 
-                        class="game-btn undo-btn {{ $this->canUndo() ? '' : 'disabled' }}" 
-                        {{ $this->canUndo() ? '' : 'disabled' }}
-                        title="Undo last move (Ctrl+Z)">
-                    ↶ Undo
-                </button>
-                <button wire:click="redo" 
-                        class="game-btn redo-btn {{ $this->canRedo() ? '' : 'disabled' }}" 
-                        {{ $this->canRedo() ? '' : 'disabled' }}
-                        title="Redo last undone move (Ctrl+Y)">
-                    ↷ Redo
-                </button>
-                <button wire:click="autoMove" class="game-btn auto-move-btn">
-                    Auto Move
-                </button>
-                <button wire:click="toggleHints" class="game-btn hint-btn {{ $showHints ? 'active' : '' }}">
-                    💡 Hints
-                </button>
-            </div>
+            <button wire:click="resetGame" class="game-button">
+                New Game
+            </button>
+            <button wire:click="undo" 
+                    class="game-button {{ $this->canUndo() ? 'primary' : '' }}" 
+                    {{ $this->canUndo() ? '' : 'disabled' }}
+                    title="Undo last move (Ctrl+Z)">
+                Undo
+            </button>
+            <button wire:click="redo" 
+                    class="game-button {{ $this->canRedo() ? 'primary' : '' }}" 
+                    {{ $this->canRedo() ? '' : 'disabled' }}
+                    title="Redo last undone move (Ctrl+Y)">
+                Redo
+            </button>
+            <button wire:click="autoMove" class="game-button">
+                Auto Move
+            </button>
+            <button wire:click="toggleHints" class="game-button {{ $showHints ? 'primary' : '' }}">
+                Hints
+            </button>
+        </div>
 
             <div class="stats-section">
                 @php $stats = $this->getStats(); @endphp
@@ -520,45 +581,33 @@ new class extends Component
                         <div>Moves: <strong>{{ $state['moves'] }}</strong></div>
                         <div>Time: <strong>{{ gmdate('i:s', $state['gameTime']) }}</strong></div>
                     </div>
-                    <button wire:click="resetGame" class="game-btn new-game-btn">
+                    <button wire:click="resetGame" class="game-button">
                         Play Again
                     </button>
                 </div>
             </div>
         @endif
-    </div>
+    </x-game.layout>
+</div>
 
     <style>
-        /* Solitaire Table Layout */
+        /* Solitaire-specific styles that complement the liminal base styles */
         .solitaire-table {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%);
-            padding: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: transparent;
             user-select: none;
             position: relative;
         }
 
-        /* Header Area (Stock, Waste, Foundations) */
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
+        /* Card play area layout */
         .stock-waste-area {
             display: flex;
-            gap: 15px;
+            gap: 1rem;
             align-items: center;
         }
 
         .foundations-area {
             display: flex;
-            gap: 10px;
+            gap: 0.75rem;
             align-items: center;
         }
 
