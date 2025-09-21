@@ -5,9 +5,55 @@ use Livewire\Volt\Component;
 
 new class extends Component {
     public array $games = [];
+    
     public function mount(): void
     {
         $this->games = app(GameRegistry::class)->listMetadata();
+    }
+    
+    public function getGameIcon($slug): string
+    {
+        return match($slug) {
+            'checkers' => '🟢',
+            'connect4' => '🔴',
+            'solitaire' => '🃏',
+            'nine-mens-morris' => '⚫',
+            'peg-solitaire' => '🔵',
+            'tic-tac-toe' => '❌',
+            '2048' => '🔢',
+            'war' => '⚔️',
+            default => '🎮'
+        };
+    }
+    
+    public function getGameGradient($slug): string
+    {
+        return match($slug) {
+            'checkers' => 'from-green-600 to-emerald-700',
+            'connect4' => 'from-red-500 to-yellow-500',
+            'solitaire' => 'from-green-600 to-blue-600',
+            'nine-mens-morris' => 'from-purple-600 to-indigo-600',
+            'peg-solitaire' => 'from-orange-500 to-red-500',
+            'tic-tac-toe' => 'from-blue-500 to-purple-500',
+            '2048' => 'from-yellow-500 to-orange-500',
+            'war' => 'from-red-600 to-pink-600',
+            default => 'from-gray-600 to-slate-700'
+        };
+    }
+    
+    public function getGameFeatures($slug): array
+    {
+        return match($slug) {
+            'checkers' => ['4 AI Difficulty Levels', 'Drag & Drop Pieces', 'Kings & Captures', 'Traditional Rules'],
+            'connect4' => ['4 AI Difficulty Levels', 'Pass & Play Mode', 'Animated Drops', 'Best Move Hints'],
+            'solitaire' => ['Drag & Drop Cards', 'Undo/Redo System', 'Multiple Scoring Modes', 'Auto-Move Detection'],
+            'nine-mens-morris' => ['3-Phase Gameplay', 'Strategic AI', 'Mill Detection', 'Professional Board'],
+            'peg-solitaire' => ['Triangular Board', 'Traditional Scoring', 'Best Move Hints', 'Multiple Start Positions'],
+            'tic-tac-toe' => ['Impossible AI', 'SVG Graphics', 'Win Line Animation', 'Pass & Play'],
+            '2048' => ['Smooth Tile Merging', 'Score Tracking', 'Responsive Grid', 'Undo Feature'],
+            'war' => ['Animated Cards', 'War Mechanics', 'Real Card Images', 'Game Statistics'],
+            default => ['Professional Quality', 'Tested & Reliable', 'Mobile Responsive']
+        };
     }
 }; ?>
 
@@ -74,54 +120,5 @@ new class extends Component {
     </section>
 </div>
 
-<?php
-if (!method_exists($this, 'getGameIcon')) {
-    function getGameIcon($slug): string {
-        return match($slug) {
-            'checkers' => '🟢',
-            'connect4' => '🔴',
-            'solitaire' => '🃏',
-            'nine-mens-morris' => '⚫',
-            'peg-solitaire' => '🔵',
-            'tic-tac-toe' => '❌',
-            '2048' => '🔢',
-            'war' => '⚔️',
-            default => '🎮'
-        };
-    }
-}
-
-if (!method_exists($this, 'getGameGradient')) {
-    function getGameGradient($slug): string {
-        return match($slug) {
-            'checkers' => 'from-green-600 to-emerald-700',
-            'connect4' => 'from-red-500 to-yellow-500',
-            'solitaire' => 'from-green-600 to-blue-600',
-            'nine-mens-morris' => 'from-purple-600 to-indigo-600',
-            'peg-solitaire' => 'from-orange-500 to-red-500',
-            'tic-tac-toe' => 'from-blue-500 to-purple-500',
-            '2048' => 'from-yellow-500 to-orange-500',
-            'war' => 'from-red-600 to-pink-600',
-            default => 'from-gray-500 to-gray-600'
-        };
-    }
-}
-
-if (!method_exists($this, 'getGameFeatures')) {
-    function getGameFeatures($slug): array {
-        return match($slug) {
-            'checkers' => ['4 AI Difficulty Levels', 'Drag & Drop Pieces', 'Kings & Captures', 'Traditional Rules'],
-            'connect4' => ['4 AI Difficulty Levels', 'Pass & Play Mode', 'Animated Drops', 'Best Move Hints'],
-            'solitaire' => ['Drag & Drop Cards', 'Undo/Redo System', 'Multiple Scoring Modes', 'Auto-Move Detection'],
-            'nine-mens-morris' => ['3-Phase Gameplay', 'Strategic AI', 'Mill Detection', 'Professional Board'],
-            'peg-solitaire' => ['Triangular Board', 'Traditional Scoring', 'Best Move Hints', 'Multiple Start Positions'],
-            'tic-tac-toe' => ['Impossible AI', 'SVG Graphics', 'Win Line Animation', 'Pass & Play'],
-            '2048' => ['Smooth Tile Merging', 'Score Tracking', 'Responsive Grid', 'Undo Feature'],
-            'war' => ['Animated Cards', 'War Mechanics', 'Real Card Images', 'Game Statistics'],
-            default => ['Professional Quality', 'Tested & Reliable', 'Mobile Responsive']
-        };
-    }
-}
-?>
 
 
