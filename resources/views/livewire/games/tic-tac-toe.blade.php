@@ -317,55 +317,55 @@ x-on:keydown.window="
         .cell-number {
             transition: opacity 0.2s ease-in-out;
         }
-        /* Tic Tac Toe specific liminal styling */
+        /* Tic Tac Toe specific minimal styling */
         .tic-tac-toe-board {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 2px;
-            width: 20rem;
-            height: 20rem;
+            gap: 1px;
+            width: 18rem;
+            height: 18rem;
             margin: 0 auto;
-            background: rgb(203 213 225);
-            border-radius: 0.5rem;
-            padding: 2px;
+            background: rgb(203 213 225 / 0.5);
+            border-radius: 0.375rem;
+            padding: 1px;
         }
 
         .dark .tic-tac-toe-board {
-            background: rgb(71 85 105);
+            background: rgb(71 85 105 / 0.5);
         }
 
         .tic-tac-toe-cell {
-            background: rgb(248 250 252);
+            background: rgb(255 255 255 / 0.8);
             border: none;
             border-radius: 0.25rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            font-weight: 600;
+            font-size: 2.5rem;
+            font-weight: 500;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
 
         .dark .tic-tac-toe-cell {
-            background: rgb(30 41 59);
+            background: rgb(30 41 59 / 0.8);
         }
 
         .tic-tac-toe-cell:not(.cursor-default):hover {
-            background: rgb(226 232 240);
+            background: rgb(226 232 240 / 0.8);
         }
 
         .dark .tic-tac-toe-cell:not(.cursor-default):hover {
-            background: rgb(51 65 85);
+            background: rgb(51 65 85 / 0.8);
         }
 
         .tic-tac-toe-cell.winning-cell {
-            background: rgb(34 197 94 / 0.2);
+            background: rgb(34 197 94 / 0.15);
         }
 
         .tic-tac-toe-cell.last-move-cell {
-            background: rgb(59 130 246 / 0.2);
+            background: rgb(59 130 246 / 0.15);
         }
 
         .cell-symbol {
