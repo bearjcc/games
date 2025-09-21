@@ -28,3 +28,4 @@ echo "\nBoard state after first move:\n";
 for ($pos = 0; $pos < 15; $pos++) {
     echo "Position $pos: " . ($state['board'][$pos] ? 'peg' : 'empty') . "\n";
 }
+

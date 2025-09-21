@@ -34,3 +34,4 @@ echo "Check status: " . ($state['check'] ? 'true' : 'false') . "\n";
 echo "Checkmate status: " . ($state['checkmate'] ? 'true' : 'false') . "\n";
 echo "Game over: " . ($state['gameOver'] ? 'true' : 'false') . "\n";
 echo "Winner: " . ($state['winner'] ?? 'null') . "\n";
+

@@ -163,3 +163,4 @@ class HexagonSlitherlinkGame implements GameInterface
         return HexagonSlitherlinkEngine::getPuzzleForPrinting($state);
     }
 }
+

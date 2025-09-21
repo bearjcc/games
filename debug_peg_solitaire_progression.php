@@ -44,3 +44,4 @@ foreach ($moves as $i => $move) {
 echo "\nFinal state:\n";
 echo "Pegs remaining: " . $state['pegsRemaining'] . "\n";
 echo "Moves: " . $state['moves'] . "\n";
+
