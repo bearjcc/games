@@ -13,17 +13,8 @@ new class extends Component {
         $registry = app(GameRegistry::class);
         $this->games = $registry->listMetadata();
         
-        // Feature the most impressive games first
-        $this->featuredGames = [
-            $this->findGame('checkers'),
-            $this->findGame('connect4'),
-            $this->findGame('solitaire'), 
-            $this->findGame('nine-mens-morris'),
-            $this->findGame('peg-solitaire'),
-            $this->findGame('tic-tac-toe'),
-            $this->findGame('2048'),
-            $this->findGame('war')
-        ];
+        // Show all games instead of just featured ones
+        $this->featuredGames = $this->games;
         
         // Generate some impressive stats
         $this->stats = [
@@ -42,33 +33,33 @@ new class extends Component {
     public function getGameIcon($slug): string
     {
         return match($slug) {
-            'checkers' => '🟢',
-            'connect4' => '🔴',
-            'solitaire' => '♠️',
-            'nine-mens-morris' => '⚫',
-            'peg-solitaire' => '🔷',
-            'tic-tac-toe' => '❌',
-            '2048' => '🔢',
-            'war' => '🃏',
-            'chess' => '♔',
-            'yahtzee' => '🎲',
-            'sudoku' => '🔢',
-            'blackjack' => '🃏',
-            'snake' => '🐍',
-            'memory' => '🧠',
-            'tetris' => '📦',
-            'minesweeper' => '💣',
-            'poker' => '🃏',
-            'go-fish' => '🐟',
-            'crazy-eights' => '🎴',
-            'spider-solitaire' => '🕷️',
-            'farkle' => '🎲',
-            'mastermind' => '🔍',
-            'phase10' => '🔟',
-            'word-detective' => '🔍',
-            'slitherlink' => '🔗',
-            'hexagon-slitherlink' => '🔷',
-            default => '🎮'
+            'checkers' => '<i class="fas fa-chess-board text-green-600"></i>',
+            'connect4' => '<i class="fas fa-circle text-red-500"></i>',
+            'solitaire' => '<i class="fas fa-spade text-black"></i>',
+            'nine-mens-morris' => '<i class="fas fa-circle-dot text-gray-800"></i>',
+            'peg-solitaire' => '<i class="fas fa-circle-notch text-blue-500"></i>',
+            'tic-tac-toe' => '<i class="fas fa-times text-red-500"></i>',
+            '2048' => '<i class="fas fa-calculator text-purple-600"></i>',
+            'war' => '<i class="fas fa-cards-blank text-indigo-600"></i>',
+            'chess' => '<i class="fas fa-chess-king text-gray-800"></i>',
+            'yahtzee' => '<i class="fas fa-dice text-orange-500"></i>',
+            'sudoku' => '<i class="fas fa-th text-blue-600"></i>',
+            'blackjack' => '<i class="fas fa-cards-blank text-green-600"></i>',
+            'snake' => '<i class="fas fa-snake text-green-500"></i>',
+            'memory' => '<i class="fas fa-brain text-purple-500"></i>',
+            'tetris' => '<i class="fas fa-cube text-yellow-500"></i>',
+            'minesweeper' => '<i class="fas fa-bomb text-red-600"></i>',
+            'poker' => '<i class="fas fa-cards-blank text-red-600"></i>',
+            'go-fish' => '<i class="fas fa-fish text-blue-500"></i>',
+            'crazy-eights' => '<i class="fas fa-cards-blank text-purple-500"></i>',
+            'spider-solitaire' => '<i class="fas fa-spider text-gray-700"></i>',
+            'farkle' => '<i class="fas fa-dice-d6 text-orange-600"></i>',
+            'mastermind' => '<i class="fas fa-search text-indigo-500"></i>',
+            'phase10' => '<i class="fas fa-ten text-red-500"></i>',
+            'word-detective' => '<i class="fas fa-search text-blue-500"></i>',
+            'slitherlink' => '<i class="fas fa-link text-green-600"></i>',
+            'hexagon-slitherlink' => '<i class="fas fa-hexagon text-blue-500"></i>',
+            default => '<i class="fas fa-gamepad text-gray-600"></i>'
         };
     }
 }; ?>
@@ -97,7 +88,7 @@ new class extends Component {
                        class="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg p-3 border border-slate-200/50 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 hover:shadow-md hover:scale-105">
                         <!-- Game Icon -->
                         <div class="w-12 h-12 mx-auto mb-2 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-lg flex items-center justify-center text-lg shadow-sm">
-                            {{ $this->getGameIcon($game['slug']) }}
+                            {!! $this->getGameIcon($game['slug']) !!}
                         </div>
                         
                         <!-- Game Name -->
@@ -114,16 +105,6 @@ new class extends Component {
             @endforeach
         </div>
         
-        <!-- View All Games Link -->
-        <div class="text-center mt-8">
-            <a href="{{ url('/games') }}" 
-               class="inline-flex items-center text-xs text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200">
-                View all {{ $stats['total_games'] }} games
-                <svg class="ml-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </a>
-        </div>
     </div>
 
 </div>

@@ -99,7 +99,7 @@
         <div class="game-status">
             @if($state['gameOver'])
                 <div class="winner-indicator">
-                    🎮 Game Over! Final Score: {{ $state['score'] }}
+                    <i class="fas fa-gamepad mr-2"></i>Game Over! Final Score: {{ $state['score'] }}
                     <div class="text-sm mt-2">
                         Level: {{ $state['level'] }} | 
                         Lines: {{ $state['linesCleared'] }} |

@@ -177,7 +177,7 @@ new class extends Component {
             @include('components.auto-demo.2048')
         @else
             <div class="text-center text-gray-400 py-8">
-                <div class="text-4xl mb-2">🎮</div>
+                <div class="text-4xl mb-2"><i class="fas fa-gamepad text-blue-500"></i></div>
                 <p>Demo not available for this game</p>
             </div>
         @endif
@@ -194,7 +194,7 @@ new class extends Component {
             </div>
         @elseif($isPlaying)
             <div class="text-lg font-semibold text-blue-400">
-                🎮 Auto-playing... {{ ucfirst($state['currentPlayer'] ?? '') }}'s turn
+                <i class="fas fa-gamepad mr-2"></i>Auto-playing... {{ ucfirst($state['currentPlayer'] ?? '') }}'s turn
             </div>
         @else
             <div class="text-lg font-semibold text-gray-400">

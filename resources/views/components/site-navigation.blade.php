@@ -7,7 +7,7 @@
             <div class="flex-shrink-0">
                 <a href="{{ url('/') }}" class="flex items-center">
                     <div class="w-6 h-6 bg-slate-700 dark:bg-slate-300 rounded-sm flex items-center justify-center mr-2">
-                        <span class="text-slate-100 dark:text-slate-900 text-xs font-medium">G</span>
+                        <i class="fas fa-gamepad text-slate-100 dark:text-slate-900 text-xs"></i>
                     </div>
                     <span class="text-slate-700 dark:text-slate-300 text-sm font-medium">Games</span>
                 </a>
@@ -17,14 +17,10 @@
             <div class="hidden md:block">
                 <div class="ml-8 flex items-center space-x-6">
                     <a href="{{ url('/') }}" 
-                       class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 text-sm font-medium transition-colors duration-200 
+                       class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 text-sm font-medium transition-colors duration-200 flex items-center
                               {{ $currentPage === 'home' ? 'text-slate-800 dark:text-slate-200' : '' }}">
-                        Home
-                    </a>
-                    <a href="{{ url('/games') }}" 
-                       class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 text-sm font-medium transition-colors duration-200
-                              {{ $currentPage === 'games' ? 'text-slate-800 dark:text-slate-200' : '' }}">
-                        All Games
+                        <i class="fas fa-home mr-1 text-xs"></i>
+                        Games
                     </a>
                 </div>
             </div>
@@ -82,12 +78,7 @@
             <a href="{{ url('/') }}" 
                class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 block px-3 py-2 text-sm font-medium transition-colors duration-200
                       {{ $currentPage === 'home' ? 'text-slate-800 dark:text-slate-200' : '' }}">
-                Home
-            </a>
-            <a href="{{ url('/games') }}" 
-               class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 block px-3 py-2 text-sm font-medium transition-colors duration-200
-                      {{ $currentPage === 'games' ? 'text-slate-800 dark:text-slate-200' : '' }}">
-                All Games
+                Games
             </a>
 
             <!-- Mobile Auth Links -->

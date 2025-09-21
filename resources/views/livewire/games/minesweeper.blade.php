@@ -153,10 +153,10 @@
                                     ">
                                         
                                         @if($isFlagged)
-                                            <span class="flag">🚩</span>
+                                            <span class="flag"><i class="fas fa-flag text-red-500"></i></span>
                                         @elseif($isRevealed)
                                             @if($isMine)
-                                                <span class="mine">💣</span>
+                                                <span class="mine"><i class="fas fa-bomb text-red-600"></i></span>
                                             @elseif($number > 0)
                                                 <span class="number">{{ $number }}</span>
                                             @endif
@@ -224,15 +224,15 @@
                         <h4>Controls</h4>
                         <div class="help-grid">
                             <div class="help-item">
-                                <span class="help-icon">🖱️</span>
+                                <span class="help-icon"><i class="fas fa-mouse-pointer text-blue-500"></i></span>
                                 <span>Left-click to reveal</span>
                             </div>
                             <div class="help-item">
-                                <span class="help-icon">🖱️</span>
+                                <span class="help-icon"><i class="fas fa-mouse-pointer text-blue-500"></i></span>
                                 <span>Right-click to flag</span>
                             </div>
                             <div class="help-item">
-                                <span class="help-icon">🔢</span>
+                                <span class="help-icon"><i class="fas fa-calculator text-green-500"></i></span>
                                 <span>Numbers show adjacent mines</span>
                             </div>
                         </div>

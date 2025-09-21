@@ -1,4 +1,4 @@
-@props(['title', 'description' => null, 'backUrl' => '/games'])
+@props(['title', 'description' => null, 'backUrl' => '/'])
 
 <section class="game-container max-w-7xl mx-auto p-3 sm:p-4 select-none">
     <!-- Minimal Game Header -->

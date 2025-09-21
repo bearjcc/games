@@ -88,7 +88,7 @@ new class extends Component {
                     </div>
                 @else
                     <div class="p-6 text-center">
-                        <div class="text-4xl mb-4">🎮</div>
+                        <div class="text-4xl mb-4"><i class="fas fa-gamepad text-slate-400"></i></div>
                         <p class="text-slate-600 dark:text-slate-400 mb-4">
                             No scores yet! Start playing games to track your progress.
                         </p>
@@ -132,7 +132,7 @@ new class extends Component {
                 
                 <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 p-6">
                     <div class="flex items-center">
-                        <div class="text-3xl mr-4">🎮</div>
+                        <div class="text-3xl mr-4"><i class="fas fa-gamepad text-blue-500"></i></div>
                         <div>
                             <div class="text-2xl font-bold text-slate-900 dark:text-slate-100">
                                 {{ count($this->games) }}
@@ -149,7 +149,7 @@ new class extends Component {
             <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
                 <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
                     <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                        🎲 Popular Games
+                        <i class="fas fa-dice mr-2 text-orange-500"></i>Popular Games
                     </h2>
                 </div>
                 
@@ -160,15 +160,15 @@ new class extends Component {
                                class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg p-4 border border-slate-200 dark:border-slate-600 transition-colors duration-200 group">
                                 <div class="text-2xl mb-2 group-hover:scale-110 transition-transform duration-200">
                                     @switch($game['slug'])
-                                        @case('checkers') ⚫ @break
-                                        @case('connect4') 🔴 @break
-                                        @case('solitaire') 🃏 @break
-                                        @case('nine-mens-morris') ⚫ @break
-                                        @case('peg-solitaire') 🔵 @break
-                                        @case('tic-tac-toe') ❌ @break
-                                        @case('2048') 🔢 @break
-                                        @case('war') ⚔️ @break
-                                        @default 🎮
+                                        @case('checkers') <i class="fas fa-chess-board text-green-600"></i> @break
+                                        @case('connect4') <i class="fas fa-circle text-red-500"></i> @break
+                                        @case('solitaire') <i class="fas fa-spade text-black"></i> @break
+                                        @case('nine-mens-morris') <i class="fas fa-circle-dot text-gray-800"></i> @break
+                                        @case('peg-solitaire') <i class="fas fa-circle-notch text-blue-500"></i> @break
+                                        @case('tic-tac-toe') <i class="fas fa-times text-red-500"></i> @break
+                                        @case('2048') <i class="fas fa-calculator text-purple-600"></i> @break
+                                        @case('war') <i class="fas fa-cards-blank text-indigo-600"></i> @break
+                                        @default <i class="fas fa-gamepad text-gray-600"></i>
                                     @endswitch
                                 </div>
                                 <h3 class="font-medium text-slate-900 dark:text-slate-100 text-sm">

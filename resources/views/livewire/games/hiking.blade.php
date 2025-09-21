@@ -172,35 +172,35 @@ new class extends Component
     {
         $icons = [
             // Distance cards
-            '25km' => '🥾',
-            '50km' => '🥾🥾',
-            '75km' => '🥾🥾🥾',
-            '100km' => '🏔️',
-            '200km' => '🏔️🏔️',
+            '25km' => '<i class="fas fa-hiking text-green-600"></i>',
+            '50km' => '<i class="fas fa-hiking text-green-600"></i><i class="fas fa-hiking text-green-600 ml-1"></i>',
+            '75km' => '<i class="fas fa-hiking text-green-600"></i><i class="fas fa-hiking text-green-600 ml-1"></i><i class="fas fa-hiking text-green-600 ml-1"></i>',
+            '100km' => '<i class="fas fa-mountain text-gray-700"></i>',
+            '200km' => '<i class="fas fa-mountain text-gray-700"></i><i class="fas fa-mountain text-gray-700 ml-1"></i>',
             
             // Hazard cards
-            'Injury' => '🩹',
-            'Dehydration' => '💧',
-            'Blisters' => '🦶',
-            'Trail Blockage' => '🪨',
-            'Slow Pace' => '🐌',
+            'Injury' => '<i class="fas fa-band-aid text-red-500"></i>',
+            'Dehydration' => '<i class="fas fa-tint text-red-500"></i>',
+            'Blisters' => '<i class="fas fa-shoe-prints text-red-500"></i>',
+            'Trail Blockage' => '<i class="fas fa-rock text-red-500"></i>',
+            'Slow Pace' => '<i class="fas fa-clock text-red-500"></i>',
             
             // Remedy cards
-            'First Aid Kit' => '🏥',
-            'Water Supply' => '💧',
-            'Moleskin' => '🩹',
-            'Alternate Route' => '🗺️',
-            'Energy Boost' => '⚡',
+            'First Aid Kit' => '<i class="fas fa-medkit text-blue-500"></i>',
+            'Water Supply' => '<i class="fas fa-tint text-blue-500"></i>',
+            'Moleskin' => '<i class="fas fa-band-aid text-blue-500"></i>',
+            'Alternate Route' => '<i class="fas fa-map text-blue-500"></i>',
+            'Energy Boost' => '<i class="fas fa-bolt text-blue-500"></i>',
             
             // Safety cards
-            'Medical Training' => '👨‍⚕️',
-            'Hydration Plan' => '📋',
-            'Proper Footwear' => '👟',
-            'Trail Map' => '🗺️',
-            'Endurance Training' => '💪',
+            'Medical Training' => '<i class="fas fa-user-md text-purple-500"></i>',
+            'Hydration Plan' => '<i class="fas fa-clipboard-list text-purple-500"></i>',
+            'Proper Footwear' => '<i class="fas fa-shoe-prints text-purple-500"></i>',
+            'Trail Map' => '<i class="fas fa-map text-purple-500"></i>',
+            'Endurance Training' => '<i class="fas fa-dumbbell text-purple-500"></i>',
         ];
 
-        return $icons[$card['name']] ?? '🃏';
+        return $icons[$card['name']] ?? '<i class="fas fa-cards-blank text-gray-500"></i>';
     }
 
     public function getCardColor($card)
@@ -302,7 +302,7 @@ new class extends Component
         @if($state['currentHazard'])
         <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
             <div class="flex items-center justify-center">
-                <span class="text-2xl mr-3">{{ $this->getCardIcon($state['currentHazard']) }}</span>
+                <span class="text-2xl mr-3">{!! $this->getCardIcon($state['currentHazard']) !!}</span>
                 <div class="text-center">
                     <div class="font-semibold text-red-800 dark:text-red-200">
                         Current Hazard: {{ $state['currentHazard']['name'] }}
@@ -363,7 +363,7 @@ new class extends Component
                          wire:click="playCard({{ $index }})"
                          @if(!$this->canPlayCard($card)) title="Cannot play this card right now" @endif>
                         <div class="text-center">
-                            <div class="text-2xl mb-2">{{ $this->getCardIcon($card) }}</div>
+                            <div class="text-2xl mb-2">{!! $this->getCardIcon($card) !!}</div>
                             <div class="font-semibold text-sm">{{ $card['name'] }}</div>
                         </div>
                     </div>

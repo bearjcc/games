@@ -20,7 +20,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Games
-Volt::route('games', 'games.index')->name('games.index');
 Volt::route('games/{slug}', 'games.show')->name('games.show');
 // Root-level game routes
 Volt::route('tic-tac-toe', 'games.tic-tac-toe')->name('t3');
