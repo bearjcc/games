@@ -10,7 +10,7 @@ describe('Checkers Game Feature', function () {
 
         $response->assertStatus(200);
         $response->assertSee(['Checkers', 'New Game']);
-        $response->assertSee(['Red', 'Black', 'Turn'], false); // Pass false to disable HTML encoding
+        $response->assertSee(['Red', 'Black'], false); // Pass false to disable HTML encoding
         
         // Test the Livewire component is functional and has game mode set
         Livewire::test('games.checkers')

@@ -91,16 +91,18 @@ new class extends Component
         // Save state for undo
         $this->saveStateForUndo();
         
+        $board = $this->state['board'];
+        [$fromRow, $fromCol] = $from;
+        
         $move = [
             'from' => $from,
             'to' => $to,
+            'piece' => $board[$fromRow][$fromCol],
         ];
         
         $game = new ChessGame();
         if ($game->validateMove($this->state, $move)) {
             // Check for pawn promotion
-            $board = $this->state['board'];
-            [$fromRow, $fromCol] = $from;
             [$toRow, $toCol] = $to;
             $piece = $board[$fromRow][$fromCol];
             
@@ -170,7 +172,10 @@ new class extends Component
         [$fromRow, $fromCol] = $move['from'];
         [$toRow, $toCol] = $move['to'];
         
-        $piece = $move['piece'];
+        $piece = $move['piece'] ?? $this->state['board'][$fromRow][$fromCol];
+        if (!$piece) {
+            return '??'; // Unknown move notation
+        }
         $pieceType = ChessEngine::getPieceType($piece);
         $captured = isset($move['captured']);
         
@@ -646,7 +651,12 @@ new class extends Component
         </div>
 
         <!-- Hint Panel -->
-        <x-game-hint-panel :hints="$this->getHints()" position="bottom-right" />
+        @if($showHints)
+            <div class="hint-panel">
+                <h4>Hints:</h4>
+                <p>Hint system not yet implemented</p>
+            </div>
+        @endif
 
         <!-- Promotion Dialog -->
         @if($promotionSquare)

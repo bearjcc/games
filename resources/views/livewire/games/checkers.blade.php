@@ -419,7 +419,6 @@ new class extends Component
         
 </section>
     </x-game.layout>
-</div>
 
 <style>
     /* Checkers game specific liminal styling */

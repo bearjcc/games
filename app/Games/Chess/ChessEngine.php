@@ -757,10 +757,21 @@ class ChessEngine
      */
     private static function wouldBeInCheck(array $state, array $move): bool
     {
-        // Apply the move temporarily
-        $tempState = self::applyMove($state, $move);
+        // Create a temporary state by manually applying the move
+        $tempState = $state;
+        $board = $tempState['board'];
+        [$fromRow, $fromCol] = $move['from'];
+        [$toRow, $toCol] = $move['to'];
         
-        // Switch back to check the original player
+        // Get the piece from the board if not provided in move
+        $piece = $move['piece'] ?? $board[$fromRow][$fromCol];
+        
+        // Apply the move
+        $board[$fromRow][$fromCol] = null;
+        $board[$toRow][$toCol] = $piece;
+        $tempState['board'] = $board;
+        
+        // Switch player to check if original player's king is in check
         $originalPlayer = $state['currentPlayer'];
         
         return self::isInCheck($tempState, $originalPlayer);
@@ -775,11 +786,15 @@ class ChessEngine
             return false;
         }
         
-        $validMoves = self::getValidMoves($state);
+        // Get basic piece moves without full validation to avoid infinite loop
+        [$fromRow, $fromCol] = $move['from'];
+        $pieceMoves = self::getPieceMoves($state, $fromRow, $fromCol);
         
-        foreach ($validMoves as $validMove) {
-            if ($validMove['from'] == $move['from'] && $validMove['to'] == $move['to']) {
-                return true;
+        // Check if the move is in the basic piece moves
+        foreach ($pieceMoves as $pieceMove) {
+            if ($pieceMove['from'] == $move['from'] && $pieceMove['to'] == $move['to']) {
+                // Check if this move would leave the king in check
+                return !self::wouldBeInCheck($state, $move);
             }
         }
         

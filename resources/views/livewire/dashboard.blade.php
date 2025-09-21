@@ -65,10 +65,10 @@ new class extends Component {
                     </h2>
                 </div>
                 
-                @if(count($scores) > 0)
+                @if(count($this->scores) > 0)
                     <div class="p-6">
                         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            @foreach($scores as $scoreData)
+                            @foreach($this->scores as $scoreData)
                                 <div class="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600">
                                     <div class="flex items-center justify-between mb-2">
                                         <h3 class="font-medium text-slate-900 dark:text-slate-100">
@@ -107,7 +107,7 @@ new class extends Component {
                         <div class="text-3xl mr-4">🎯</div>
                         <div>
                             <div class="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                {{ count($scores) }}
+                                {{ count($this->scores) }}
                             </div>
                             <div class="text-sm text-slate-600 dark:text-slate-400">
                                 Games with Scores
@@ -121,7 +121,7 @@ new class extends Component {
                         <div class="text-3xl mr-4">🏅</div>
                         <div>
                             <div class="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                {{ count($scores) > 0 ? max(array_column($scores, 'score')) : 0 }}
+                                {{ count($this->scores) > 0 ? max(array_column($this->scores, 'score')) : 0 }}
                             </div>
                             <div class="text-sm text-slate-600 dark:text-slate-400">
                                 Highest Score
@@ -135,7 +135,7 @@ new class extends Component {
                         <div class="text-3xl mr-4">🎮</div>
                         <div>
                             <div class="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                {{ count($games) }}
+                                {{ count($this->games) }}
                             </div>
                             <div class="text-sm text-slate-600 dark:text-slate-400">
                                 Available Games
@@ -155,7 +155,7 @@ new class extends Component {
                 
                 <div class="p-6">
                     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        @foreach(array_slice($games, 0, 8) as $game)
+                        @foreach(array_slice($this->games, 0, 8) as $game)
                             <a href="{{ url('/' . $game['slug']) }}" 
                                class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg p-4 border border-slate-200 dark:border-slate-600 transition-colors duration-200 group">
                                 <div class="text-2xl mb-2 group-hover:scale-110 transition-transform duration-200">
@@ -174,9 +174,9 @@ new class extends Component {
                                 <h3 class="font-medium text-slate-900 dark:text-slate-100 text-sm">
                                     {{ $game['name'] }}
                                 </h3>
-                                @if(isset($scores[$game['slug']]))
+                                @if(isset($this->scores[$game['slug']]))
                                     <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                                        Best: {{ number_format($scores[$game['slug']]['score']) }}
+                                        Best: {{ number_format($this->scores[$game['slug']]['score']) }}
                                     </p>
                                 @endif
                             </a>

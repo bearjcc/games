@@ -7,7 +7,7 @@ use App\Games\GameRegistry;
 // Homepage -> New impressive homepage
 Volt::route('/', 'games.homepage')->name('home');
 
-Route::view('dashboard', 'dashboard')
+Volt::route('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
