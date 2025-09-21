@@ -266,6 +266,10 @@ class NineMensMorrisEngine
      */
     public static function checkMillFormation(array $state, int $position, string $player): bool
     {
+        // Temporarily place the piece to check for mill formation
+        $originalPiece = $state['board'][$position];
+        $state['board'][$position] = $player;
+        
         foreach (self::$mills as $mill) {
             if (in_array($position, $mill)) {
                 $count = 0;
@@ -275,10 +279,15 @@ class NineMensMorrisEngine
                     }
                 }
                 if ($count === 3) {
+                    // Restore original piece
+                    $state['board'][$position] = $originalPiece;
                     return true;
                 }
             }
         }
+        
+        // Restore original piece
+        $state['board'][$position] = $originalPiece;
         return false;
     }
 

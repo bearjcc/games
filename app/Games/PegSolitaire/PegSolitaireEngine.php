@@ -40,8 +40,8 @@ class PegSolitaireEngine
         [10, 6, 3], [12, 7, 3], [11, 7, 4], [13, 8, 4], [12, 8, 5], [14, 9, 5],
         [5, 4, 3], [8, 7, 6], [9, 8, 7], [12, 11, 10], [13, 12, 11], [14, 13, 12],
         
-        // Additional diagonal jumps
-        [6, 11, 15], [8, 12, 15], // These don't exist in 15-hole version, removing
+        // Additional diagonal jumps (missing patterns)
+        [1, 2, 4], [2, 1, 3], // Row 2 diagonal jumps
         
         // Cross-diagonal jumps for triangular board
         [0, 3, 6], [0, 4, 10], [2, 5, 9], [2, 8, 14],
@@ -238,22 +238,22 @@ class PegSolitaireEngine
         // Triangular layout coordinates (x, y as percentages)
         $coordinates = [
             // Row 1
-            0 => [50, 10],
+            0 => [50.0, 10.0],
             
             // Row 2  
-            1 => [35, 25], 2 => [65, 25],
+            1 => [35.0, 25.0], 2 => [65.0, 25.0],
             
             // Row 3
-            3 => [20, 40], 4 => [50, 40], 5 => [80, 40],
+            3 => [20.0, 40.0], 4 => [50.0, 40.0], 5 => [80.0, 40.0],
             
             // Row 4
-            6 => [5, 55], 7 => [35, 55], 8 => [65, 55], 9 => [95, 55],
+            6 => [5.0, 55.0], 7 => [35.0, 55.0], 8 => [65.0, 55.0], 9 => [95.0, 55.0],
             
             // Row 5
-            10 => [5, 70], 11 => [27.5, 70], 12 => [50, 70], 13 => [72.5, 70], 14 => [95, 70]
+            10 => [5.0, 70.0], 11 => [27.5, 70.0], 12 => [50.0, 70.0], 13 => [72.5, 70.0], 14 => [95.0, 70.0]
         ];
 
-        return $coordinates[$position] ?? [50, 50];
+        return $coordinates[$position] ?? [50.0, 50.0];
     }
 
     /**

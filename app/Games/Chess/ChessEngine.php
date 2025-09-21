@@ -142,6 +142,34 @@ class ChessEngine
     }
     
     /**
+     * Get all valid moves for the current player (simplified version to avoid infinite loops)
+     */
+    private static function getValidMovesSimple(array $state): array
+    {
+        $moves = [];
+        $board = $state['board'];
+        $currentPlayer = $state['currentPlayer'];
+        
+        for ($row = 0; $row < self::BOARD_SIZE; $row++) {
+            for ($col = 0; $col < self::BOARD_SIZE; $col++) {
+                $piece = $board[$row][$col];
+                if ($piece && self::getPieceColor($piece) === $currentPlayer) {
+                    $pieceMoves = self::getPieceMoves($state, $row, $col);
+                    foreach ($pieceMoves as $move) {
+                        // Simple check: don't validate if move would leave king in check
+                        // This is a simplified version to avoid infinite loops
+                        if (!self::wouldBeInCheck($state, $move)) {
+                            $moves[] = $move;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $moves;
+    }
+    
+    /**
      * Get all possible moves for a piece at the given position
      */
     public static function getPieceMoves(array $state, int $row, int $col): array
@@ -426,7 +454,7 @@ class ChessEngine
         $castlingPrefix = $color === self::WHITE ? 'white' : 'black';
         
         // Kingside castling
-        if ($state['castlingRights'][$castlingPrefix . '_kingside']) {
+        if ($state['castlingRights'][$castlingPrefix . '_kingside'] && $col + 3 < self::BOARD_SIZE) {
             if (!$board[$row][$col + 1] && !$board[$row][$col + 2] && 
                 $board[$row][$col + 3] === ($color === self::WHITE ? self::WHITE_ROOK : self::BLACK_ROOK)) {
                 
@@ -452,7 +480,7 @@ class ChessEngine
         }
         
         // Queenside castling
-        if ($state['castlingRights'][$castlingPrefix . '_queenside']) {
+        if ($state['castlingRights'][$castlingPrefix . '_queenside'] && $col - 4 >= 0) {
             if (!$board[$row][$col - 1] && !$board[$row][$col - 2] && !$board[$row][$col - 3] &&
                 $board[$row][$col - 4] === ($color === self::WHITE ? self::WHITE_ROOK : self::BLACK_ROOK)) {
                 
@@ -493,13 +521,14 @@ class ChessEngine
         $board = $newState['board'];
         [$fromRow, $fromCol] = $move['from'];
         [$toRow, $toCol] = $move['to'];
-        $piece = $move['piece'];
+        $piece = $move['piece'] ?? $board[$fromRow][$fromCol];
         
         // Reset en passant target
         $newState['enPassantTarget'] = null;
         
         // Handle different move types
-        switch ($move['type']) {
+        $moveType = $move['type'] ?? 'move';
+        switch ($moveType) {
             case 'move':
             case 'capture':
                 $board[$fromRow][$fromCol] = null;
@@ -519,7 +548,7 @@ class ChessEngine
                     }
                 }
                 
-                if ($move['type'] === 'capture') {
+                if (($move['type'] ?? 'move') === 'capture') {
                     $newState['capturedPieces'][self::getPieceColor($move['captured'])][] = $move['captured'];
                 }
                 break;
@@ -527,8 +556,11 @@ class ChessEngine
             case 'en_passant':
                 $board[$fromRow][$fromCol] = null;
                 $board[$toRow][$toCol] = $piece;
+                $capturedPawn = $board[$fromRow][$toCol];
                 $board[$fromRow][$toCol] = null; // Remove the captured pawn
-                $newState['capturedPieces'][self::getPieceColor($move['captured'])][] = $move['captured'];
+                if ($capturedPawn) {
+                    $newState['capturedPieces'][self::getPieceColor($capturedPawn)][] = $capturedPawn;
+                }
                 break;
                 
             case 'castle_kingside':
@@ -548,8 +580,10 @@ class ChessEngine
         
         $newState['board'] = $board;
         
-        // Update castling rights
-        self::updateCastlingRights($newState, $move);
+        // Update castling rights (pass original piece info)
+        $moveWithPiece = $move;
+        $moveWithPiece['piece'] = $piece;
+        self::updateCastlingRights($newState, $moveWithPiece);
         
         // Update move counters
         $newState['moves']++;
@@ -580,9 +614,22 @@ class ChessEngine
      */
     private static function updateCastlingRights(array &$state, array $move): void
     {
-        $piece = $move['piece'];
+        $piece = $move['piece'] ?? $state['board'][$move['from'][0]][$move['from'][1]];
         [$fromRow, $fromCol] = $move['from'];
         [$toRow, $toCol] = $move['to'];
+        
+        if (!$piece) {
+            return;
+        }
+        
+        // Handle castling moves specially
+        $moveType = $move['type'] ?? 'move';
+        if ($moveType === 'castle_kingside' || $moveType === 'castle_queenside') {
+            $color = self::getPieceColor($piece);
+            $state['castlingRights'][$color . '_kingside'] = false;
+            $state['castlingRights'][$color . '_queenside'] = false;
+            return;
+        }
         
         // King movement removes all castling rights for that color
         if (self::getPieceType($piece) === 'king') {
@@ -621,15 +668,15 @@ class ChessEngine
     /**
      * Update game status (check, checkmate, stalemate)
      */
-    private static function updateGameStatus(array $state): array
+    public static function updateGameStatus(array $state): array
     {
         $currentPlayer = $state['currentPlayer'];
         
         // Check if current player is in check
         $state['check'] = self::isInCheck($state, $currentPlayer);
         
-        // Get all valid moves for current player
-        $validMoves = self::getValidMoves($state);
+        // Get all valid moves for current player (simplified to avoid infinite loops)
+        $validMoves = self::getValidMovesSimple($state);
         
         if (empty($validMoves)) {
             if ($state['check']) {
@@ -713,7 +760,7 @@ class ChessEngine
     }
     
     /**
-     * Get all squares attacked by a piece (similar to getPieceMoves but only attack squares)
+     * Get all squares attacked by a piece (simplified version to avoid infinite loops)
      */
     private static function getPieceAttacks(array $state, int $row, int $col): array
     {
@@ -725,27 +772,84 @@ class ChessEngine
         }
         
         $pieceType = self::getPieceType($piece);
+        $color = self::getPieceColor($piece);
         $attacks = [];
         
-        // For most pieces, attacks are the same as moves
-        $moves = self::getPieceMoves($state, $row, $col);
-        foreach ($moves as $move) {
-            $attacks[] = $move['to'];
+        switch ($pieceType) {
+            case 'pawn':
+                $direction = $color === self::WHITE ? -1 : 1;
+                // Pawn attacks diagonally
+                foreach ([-1, 1] as $colOffset) {
+                    $newRow = $row + $direction;
+                    $newCol = $col + $colOffset;
+                    if (self::isValidPosition($newRow, $newCol)) {
+                        $attacks[] = [$newRow, $newCol];
+                    }
+                }
+                break;
+                
+            case 'rook':
+                $directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                $attacks = self::getSlidingAttacks($board, $row, $col, $directions);
+                break;
+                
+            case 'bishop':
+                $directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+                $attacks = self::getSlidingAttacks($board, $row, $col, $directions);
+                break;
+                
+            case 'queen':
+                $directions = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+                $attacks = self::getSlidingAttacks($board, $row, $col, $directions);
+                break;
+                
+            case 'knight':
+                $knightMoves = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+                foreach ($knightMoves as [$rowOffset, $colOffset]) {
+                    $newRow = $row + $rowOffset;
+                    $newCol = $col + $colOffset;
+                    if (self::isValidPosition($newRow, $newCol)) {
+                        $attacks[] = [$newRow, $newCol];
+                    }
+                }
+                break;
+                
+            case 'king':
+                $kingMoves = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+                foreach ($kingMoves as [$rowOffset, $colOffset]) {
+                    $newRow = $row + $rowOffset;
+                    $newCol = $col + $colOffset;
+                    if (self::isValidPosition($newRow, $newCol)) {
+                        $attacks[] = [$newRow, $newCol];
+                    }
+                }
+                break;
         }
         
-        // Special case for pawn attacks (different from pawn moves)
-        if ($pieceType === 'pawn') {
-            $attacks = [];
-            $color = self::getPieceColor($piece);
-            $direction = $color === self::WHITE ? -1 : 1;
+        return $attacks;
+    }
+    
+    /**
+     * Get sliding attacks for rook, bishop, and queen
+     */
+    private static function getSlidingAttacks(array $board, int $row, int $col, array $directions): array
+    {
+        $attacks = [];
+        
+        foreach ($directions as [$rowOffset, $colOffset]) {
+            $newRow = $row + $rowOffset;
+            $newCol = $col + $colOffset;
             
-            // Pawn attacks diagonally regardless of whether there's a piece there
-            foreach ([-1, 1] as $colOffset) {
-                $newRow = $row + $direction;
-                $newCol = $col + $colOffset;
-                if (self::isValidPosition($newRow, $newCol)) {
-                    $attacks[] = [$newRow, $newCol];
+            while (self::isValidPosition($newRow, $newCol)) {
+                $attacks[] = [$newRow, $newCol];
+                
+                // Stop if we hit a piece
+                if ($board[$newRow][$newCol]) {
+                    break;
                 }
+                
+                $newRow += $rowOffset;
+                $newCol += $colOffset;
             }
         }
         
@@ -766,12 +870,45 @@ class ChessEngine
         // Get the piece from the board if not provided in move
         $piece = $move['piece'] ?? $board[$fromRow][$fromCol];
         
-        // Apply the move
-        $board[$fromRow][$fromCol] = null;
-        $board[$toRow][$toCol] = $piece;
+        if (!$piece) {
+            return false;
+        }
+        
+        // Handle different move types
+        $moveType = $move['type'] ?? 'move';
+        
+        switch ($moveType) {
+            case 'en_passant':
+                // En passant capture
+                $board[$fromRow][$fromCol] = null;
+                $board[$toRow][$toCol] = $piece;
+                $board[$fromRow][$toCol] = null; // Remove captured pawn
+                break;
+                
+            case 'castle_kingside':
+            case 'castle_queenside':
+                // Castling moves
+                $board[$fromRow][$fromCol] = null;
+                $board[$toRow][$toCol] = $piece;
+                if ($moveType === 'castle_kingside') {
+                    $board[$fromRow][$fromCol + 3] = null; // Remove rook
+                    $board[$fromRow][$fromCol + 1] = self::getPieceColor($piece) === self::WHITE ? self::WHITE_ROOK : self::BLACK_ROOK;
+                } else {
+                    $board[$fromRow][$fromCol - 4] = null; // Remove rook
+                    $board[$fromRow][$fromCol - 1] = self::getPieceColor($piece) === self::WHITE ? self::WHITE_ROOK : self::BLACK_ROOK;
+                }
+                break;
+                
+            default:
+                // Regular move or capture
+                $board[$fromRow][$fromCol] = null;
+                $board[$toRow][$toCol] = $piece;
+                break;
+        }
+        
         $tempState['board'] = $board;
         
-        // Switch player to check if original player's king is in check
+        // Check if original player's king is in check
         $originalPlayer = $state['currentPlayer'];
         
         return self::isInCheck($tempState, $originalPlayer);

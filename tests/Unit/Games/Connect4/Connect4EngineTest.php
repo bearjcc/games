@@ -147,17 +147,18 @@ describe('Connect4Engine', function () {
     it('detects draw games', function () {
         $state = Connect4Engine::initialState();
         
-        // Fill board without creating 4 in a row
+        // Fill board without creating 4 in a row - use a safer pattern
         $pattern = [
+            [Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, null],
             [Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED],
             [Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW],
             [Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED],
             [Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW],
-            [Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED],
-            [Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, null]
+            [Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED]
         ];
         
         $state['board'] = $pattern;
+        $state['currentPlayer'] = Connect4Engine::RED; // Red will drop the last piece
         
         // Drop last piece
         $newState = Connect4Engine::dropPiece($state, 6);
@@ -231,6 +232,7 @@ describe('Connect4Engine', function () {
         $state = Connect4Engine::initialState();
         $state['winner'] = Connect4Engine::RED;
         $state['moves'] = 20;
+        $state['gameOver'] = true;
         
         $scores = Connect4Engine::getScore($state);
         

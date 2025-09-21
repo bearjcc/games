@@ -221,22 +221,23 @@ class ChessGameTest extends TestCase
         $state = $this->game->initialState();
         
         // Set up en passant scenario
-        $state['board'][4][4] = 'white_pawn'; // e5
-        $state['board'][4][5] = 'black_pawn'; // f5
+        $state['board'][3][4] = 'white_pawn'; // e5
+        $state['board'][3][5] = 'black_pawn'; // f5
         $state['board'][6][4] = null; // Remove original white pawn
-        $state['enPassantTarget'] = [5, 5]; // f6
+        $state['enPassantTarget'] = [2, 5]; // f6
         
         $enPassantMove = [
-            'from' => [4, 4], // e5
-            'to' => [3, 5],   // f6
-            'type' => 'en_passant'
+            'from' => [3, 4], // e5
+            'to' => [2, 5],   // f6
+            'type' => 'en_passant',
+            'piece' => 'white_pawn'
         ];
         
         $this->assertTrue($this->game->validateMove($state, $enPassantMove));
         
         $newState = $this->game->applyMove($state, $enPassantMove);
-        $this->assertEquals('white_pawn', $newState['board'][3][5]); // f6
-        $this->assertNull($newState['board'][4][5]); // f5 captured
+        $this->assertEquals('white_pawn', $newState['board'][2][5]); // f6
+        $this->assertNull($newState['board'][3][5]); // f5 captured
     }
     
     public function test_it_handles_check_scenarios()
@@ -246,10 +247,11 @@ class ChessGameTest extends TestCase
         // Set up check scenario
         $state['board'] = array_fill(0, 8, array_fill(0, 8, null));
         $state['board'][7][4] = 'white_king'; // e1
-        $state['board'][0][4] = 'black_rook'; // e8
+        $state['board'][7][3] = 'black_queen'; // d1 (already in check position)
+        $state['currentPlayer'] = 'white';
         
-        // Apply a rook move to create check
-        $state = ChessEngine::applyMove($state, ['from' => [0, 4], 'to' => [1, 4]]);
+        // Update game status to detect check
+        $state = ChessEngine::updateGameStatus($state);
         
         $this->assertTrue($state['check']);
         
@@ -267,10 +269,13 @@ class ChessGameTest extends TestCase
         $state['board'][6][3] = 'white_pawn'; // d2
         $state['board'][6][4] = 'white_pawn'; // e2
         $state['board'][6][5] = 'white_pawn'; // f2
-        $state['board'][0][4] = 'black_rook'; // e8
+        $state['board'][7][2] = 'black_queen'; // c1 (blocks king escape)
+        $state['board'][7][5] = 'black_rook'; // f1 (blocks king escape)
+        $state['board'][0][4] = 'black_rook'; // e8 (attacks e-file)
+        $state['currentPlayer'] = 'white';
         
-        // Apply a rook move to create checkmate
-        $state = ChessEngine::applyMove($state, ['from' => [0, 4], 'to' => [7, 4]]);
+        // Update game status to detect checkmate
+        $state = ChessEngine::updateGameStatus($state);
         
         $this->assertTrue($state['checkmate']);
         $this->assertTrue($state['gameOver']);
@@ -289,10 +294,11 @@ class ChessGameTest extends TestCase
         $state['board'] = array_fill(0, 8, array_fill(0, 8, null));
         $state['board'][7][0] = 'white_king'; // a1
         $state['board'][5][1] = 'black_king'; // b3
-        $state['board'][6][2] = 'black_queen'; // c2
+        $state['board'][6][2] = 'black_queen'; // c2 (not attacking king)
+        $state['currentPlayer'] = 'white';
         
-        // Apply a queen move to create stalemate
-        $state = ChessEngine::applyMove($state, ['from' => [6, 2], 'to' => [6, 1]]);
+        // Update game status to detect stalemate
+        $state = ChessEngine::updateGameStatus($state);
         
         $this->assertTrue($state['stalemate']);
         $this->assertTrue($state['gameOver']);

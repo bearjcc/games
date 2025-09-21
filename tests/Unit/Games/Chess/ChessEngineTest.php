@@ -184,7 +184,7 @@ class ChessEngineTest extends TestCase
         $state['board'][4][4] = 'white_pawn'; // e5
         $state['board'][4][3] = 'black_pawn'; // d5
         $state['board'][6][4] = null; // Remove original white pawn
-        $state['enPassantTarget'] = [5, 3]; // d6
+        $state['enPassantTarget'] = [3, 3]; // d6
         $state['currentPlayer'] = 'white';
         
         $move = [
@@ -243,16 +243,20 @@ class ChessEngineTest extends TestCase
     {
         $state = ChessEngine::initialState();
         
-        // Set up fool's mate scenario
+        // Set up a simple checkmate scenario
         $state['board'] = array_fill(0, 8, array_fill(0, 8, null));
         $state['board'][7][4] = 'white_king'; // e1
-        $state['board'][0][3] = 'black_queen'; // d8
-        $state['board'][1][4] = 'black_pawn'; // e7
-        $state['board'][2][3] = 'black_pawn'; // d6
-        $state['board'][2][5] = 'black_pawn'; // f6
+        $state['board'][6][3] = 'white_pawn'; // d2
+        $state['board'][6][4] = 'white_pawn'; // e2
+        $state['board'][6][5] = 'white_pawn'; // f2
+        $state['board'][7][2] = 'black_queen'; // c1 (blocks king escape)
+        $state['board'][7][5] = 'black_rook'; // f1 (blocks king escape)
+        $state['board'][0][4] = 'black_rook'; // e8 (attacks e-file)
+        $state['currentPlayer'] = 'white'; // White to move
         
-        // Apply a queen move to create checkmate
-        $state = ChessEngine::applyMove($state, ['from' => [0, 3], 'to' => [7, 4]]);
+        // White king is in check from both rook and queen, and has no legal moves
+        // This should be detected as checkmate
+        $state = ChessEngine::updateGameStatus($state);
         
         $this->assertTrue($state['check']);
         $this->assertTrue($state['checkmate']);
@@ -323,23 +327,26 @@ class ChessEngineTest extends TestCase
     {
         $state = ChessEngine::initialState();
         
-        // Set up scenario where moving king would put it in check
+        // Set up scenario where king is in check and some moves would still leave it in check
         $state['board'] = array_fill(0, 8, array_fill(0, 8, null));
         $state['board'][7][4] = 'white_king'; // e1
-        $state['board'][0][4] = 'black_rook'; // e8
+        $state['board'][0][4] = 'black_rook'; // e8 (attacks e-file)
+        $state['board'][0][3] = 'black_rook'; // d8 (attacks d-file)
         
-        // King cannot move to d1, e2, or f1 (still in check)
+        // King cannot move to d1 (still in check from d8 rook)
         $this->assertFalse(ChessEngine::validateMove($state, [
             'from' => [7, 4],
             'to' => [7, 3]
         ]));
         
+        // King cannot move to e2 (still in check from e8 rook)
         $this->assertFalse(ChessEngine::validateMove($state, [
             'from' => [7, 4],
             'to' => [6, 4]
         ]));
         
-        $this->assertFalse(ChessEngine::validateMove($state, [
+        // King CAN move to f1 (out of check)
+        $this->assertTrue(ChessEngine::validateMove($state, [
             'from' => [7, 4],
             'to' => [7, 5]
         ]));

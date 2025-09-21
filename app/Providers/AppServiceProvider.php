@@ -25,6 +25,7 @@ use App\Games\Phase10\Phase10Game;
 use App\Games\WordDetective\WordDetectiveGame;
 use App\Games\Slitherlink\SlitherlinkGame;
 use App\Games\HexagonSlitherlink\HexagonSlitherlinkGame;
+use App\Games\Hiking\HikingGame;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -62,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(new WordDetectiveGame());
             $registry->register(new SlitherlinkGame());
             $registry->register(new HexagonSlitherlinkGame());
+            $registry->register(new HikingGame());
             return $registry;
         });
     }

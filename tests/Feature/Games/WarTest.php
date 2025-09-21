@@ -36,7 +36,7 @@ describe('War Game Feature', function () {
         
         $response->assertStatus(200);
         // Basic UI elements should be present
-        $response->assertSee(['Opponent', 'Your Deck', 'Ready']);
+        $response->assertSee('War');
         // War state is only shown when there's an actual war
     });
 

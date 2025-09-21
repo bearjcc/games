@@ -92,11 +92,11 @@ describe('PegSolitaireGame', function () {
     it('tracks game progression', function () {
         $state = $this->game->initialState();
         
-        // Make several moves
+        // Make several moves (using moves that will be valid after each step)
         $moves = [
             ['from' => 1, 'over' => 2, 'to' => 4],
-            ['from' => 3, 'over' => 4, 'to' => 5],
-            ['from' => 6, 'over' => 7, 'to' => 8]
+            ['from' => 6, 'over' => 3, 'to' => 1],
+            ['from' => 0, 'over' => 1, 'to' => 3]
         ];
         
         foreach ($moves as $move) {

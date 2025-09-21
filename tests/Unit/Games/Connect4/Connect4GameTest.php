@@ -114,17 +114,18 @@ describe('Connect4Game', function () {
     it('handles draw games correctly', function () {
         $state = $this->game->initialState();
         
-        // Set up a full board without winner
-        for ($row = 0; $row < 6; $row++) {
-            for ($col = 0; $col < 6; $col++) { // Fill all but last column
-                $state['board'][$row][$col] = ($row + $col) % 2 === 0 ? Connect4Engine::RED : Connect4Engine::YELLOW;
-            }
-        }
+        // Set up a safe board pattern that won't create wins
+        $pattern = [
+            [Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, null],
+            [Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED],
+            [Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW],
+            [Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED],
+            [Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW],
+            [Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED, Connect4Engine::YELLOW, Connect4Engine::RED]
+        ];
         
-        // Fill last column except top
-        for ($row = 1; $row < 6; $row++) {
-            $state['board'][$row][6] = Connect4Engine::RED;
-        }
+        $state['board'] = $pattern;
+        $state['currentPlayer'] = Connect4Engine::RED;
         
         $move = ['column' => 6];
         $newState = $this->game->applyMove($state, $move);
