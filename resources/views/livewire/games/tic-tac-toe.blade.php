@@ -227,7 +227,7 @@ x-on:keydown.window="
     <!-- Game Status -->
     <div class="text-center mb-6">
         @if ($winner)
-            <div class="game-result animate-bounce">
+            <div class="game-result fade-in">
                 @if($winner === 'X')
                     <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                         🎉 You Win!
@@ -244,7 +244,7 @@ x-on:keydown.window="
                 <div class="text-sm opacity-80">Click any mode button to play again</div>
             </div>
         @elseif($isDraw)
-            <div class="game-result animate-bounce">
+            <div class="game-result fade-in">
                 <div class="text-2xl font-bold text-gray-600 dark:text-gray-400 mb-2">
                     🤝 It's a Draw!
                 </div>

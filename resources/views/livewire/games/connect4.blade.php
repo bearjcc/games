@@ -490,7 +490,7 @@ new class extends Component
             border-radius: 50%;
             opacity: 0.7;
             border: 2px solid rgba(255,255,255,0.3);
-            animation: bounce 0.5s ease-in-out infinite alternate;
+            animation: gentle-pulse 2s ease-in-out infinite;
         }
 
         .preview-piece.red {
@@ -501,10 +501,6 @@ new class extends Component
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
         }
 
-        @keyframes bounce {
-            from { transform: translateY(-5px); }
-            to { transform: translateY(5px); }
-        }
 
         .board-grid {
             display: grid;

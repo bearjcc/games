@@ -745,12 +745,7 @@ new class extends Component
             background: rgba(59, 130, 246, 0.7);
             border-radius: 50%;
             border: 2px solid white;
-            animation: pulse 1s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse {
-            from { transform: scale(1); opacity: 0.7; }
-            to { transform: scale(1.2); opacity: 1; }
+            animation: gentle-pulse 2s ease-in-out infinite;
         }
 
         .game-info {

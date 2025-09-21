@@ -98,7 +98,7 @@
     }
     
     .win-celebration {
-        animation: winCelebration 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     /* Subtle indicator animations */
