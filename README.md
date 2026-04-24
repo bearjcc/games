@@ -13,6 +13,13 @@ A comprehensive collection of classic games built with Laravel, Livewire, and a 
 - **Responsive Design**: Works perfectly on desktop and mobile
 - **Accessibility**: Full keyboard navigation and screen reader support
 
+## 🌐 Production Routing
+
+- Canonical host: `https://ursaminor.games`
+- Canonical game URL format: `https://ursaminor.games/<slug>` (example: `/sudoku`)
+- Legacy subdomains should 301 redirect to the canonical path URL
+- This repository is the single source of truth for open source game code
+
 ## 🚀 Quick Start
 
 ### Prerequisites
